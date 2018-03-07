@@ -11,11 +11,11 @@ example command can be found by typing in chat where the bot is running by /help
 * Rename "settings_template".json as "settings.json".
 
 ## run bot by:
-  node bot_commands.js
+    node bot_commands.js
   
   or test bot by:
   
-  node bot_commands.js --test
+    node bot_commands.js --test
 
 ## cronjob for daily messages:
   You could use forever.js for running node in the background.
