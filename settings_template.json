@@ -1,0 +1,31 @@
+{
+    "botName": "",
+    "testBotName": "",
+    "test_bot_key": "",
+    "prod_bot_key": "",
+    "openweathermap": "",
+    "giphy": "",
+    "watson_username": "",
+    "watson_password": "",
+    "testChatId": "",
+    "productionChatId": "",
+    "morning_greetings": [
+        "Gooooooooood morrrrning Vietnammmm!",
+        "Gooooooooood morrrrning Lahti!",
+        "Good morning Finland!",
+        "Good morning!",
+        "Good mornin'",
+        "Hyvää huomenta!",
+        "Good morning, good morning, good",
+        "Good morning you sexy beasts!",
+        "Good morning, how did you sleep?",
+        "Good morning Beatiful!",
+        "Morning starts with coffee right?",
+        "Sunbeams will soon smile through, good mornin', good mornin', to you",
+        "Hyvää huomenta Suomi, hyvin pyyhkii, sun poikas valvoo taas ja ahkeroi",
+        "Rise and shine mr. Freeman, rise and shine...",
+        "It's a new great day ahead!",
+        "Time to wake up! It's a great day ahead!",
+        "Good morning, did you miss me?"
+    ]
+}
