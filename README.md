@@ -1,7 +1,7 @@
 WIP: at current state bot has not been tested after pushing it to github and there is no package file for npm packages to install. If you wanna try it out you have to do some configuring. I'll be testing and setting up this as I go that it work later on. Code in itself should work, but at this state it hasn't been tested to work.
 
 # Telegrambot
-Telegrambot with daily messages and commands to get information, like train-timetable, weather, and news. It also enables making simple reminders.
+Telegrambot with daily messages and commands to get information, like train-timetable, weather, and news. It also enables making simple reminders. Also it supports voice messages in english language. Voice message is sent to Microsoft Watson voice-recoqnition API and it tries to detect what you said.
 
 example command can be found by typing in chat where the bot is running by /help
 
