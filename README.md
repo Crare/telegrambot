@@ -5,7 +5,33 @@ Telegrambot with daily messages and commands to get information, like train-time
 
 example command can be found by typing in chat where the bot is running by /help
 
-## Setting up
+## example images
+
+(Timestamps in these telegram photos are in different time zone, than the actual bot.)
+
+reminders
+
+![alt tag](https://github.com/Crare/telegrambot/blob/master/example_images/snip1.PNG)
+![alt tag](https://github.com/Crare/telegrambot/blob/master/example_images/snip6.PNG)
+
+VR train timetable from point A to point B.
+
+![alt tag](https://github.com/Crare/telegrambot/blob/master/example_images/snip3.PNG)
+
+weather data
+
+![alt tag](https://github.com/Crare/telegrambot/blob/master/example_images/snip4.PNG)
+
+heads or tails
+
+![alt tag](https://github.com/Crare/telegrambot/blob/master/example_images/snip5.PNG)
+
+random gif or semi-random with tag.
+
+![alt tag](https://github.com/Crare/telegrambot/blob/master/example_images/snip7.PNG)
+
+
+# Setting up
 * Set all api keys that are needed in the "settings_template.json".
 * Add also your bot token keys for testing bot and production, can be same if you don't mind same bot being in production.
 * Rename "settings_template".json as "settings.json".
