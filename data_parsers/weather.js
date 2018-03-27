@@ -187,10 +187,15 @@ exports.getOpenWeatherData = (place, days, callBack, errorCallBack) => {
         });
         res.on('end', function() {
           var data = JSON.parse(body);
-          data.dayAmount = days;
-          output = tulostaOpenweatherData(data);
-          //console.log(output);
-          callBack(output);
+          if (data != undefined && data.cod != '404') {
+            console.log(data);
+            data.dayAmount = days;
+            output = tulostaOpenweatherData(data);
+            //console.log(output);
+            callBack(output);
+          } else {
+            callBack("Couldn't find that place. Try something else.")
+          }
         });
       }).on('error', function(e){
         console.log("Got an error: ", e);

@@ -1,0 +1,31 @@
+{
+  "name": "telegrambot",
+  "version": "1.0.0",
+  "description": "Telegrambot that tells weather, news, train schedules etc.",
+  "main": "bot_commands.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/crare/telegrambot.git"
+  },
+  "keywords": [
+    "telegrambot",
+    "nodejs"
+  ],
+  "author": "crare",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/crare/telegrambot/issues"
+  },
+  "homepage": "https://github.com/crare/telegrambot#readme",
+  "dependencies": {
+    "commander": "^2.15.1",
+    "diskspace": "^2.0.0",
+    "giphy-js-sdk-core": "^1.0.3",
+    "telegraf": "^3.20.0",
+    "watson-developer-cloud": "^3.2.1",
+    "xml2json": "^0.11.2"
+  }
+}

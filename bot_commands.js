@@ -36,20 +36,20 @@ cmdargs
 
 // setup bot
 let botToken = settings.prod_bot_key;
-let sendToChatId = productionChatId;
+let sendToChatId = settings.productionChatId;
 let botName = settings.botName;
 if(cmdargs.test) {
   botToken = settings.test_bot_key;
-  sendToChatId = testChatId;
+  sendToChatId = settings.testChatId;
   botName = settings.testBotName;
 }
 const bot = new Telegraf(botToken)
 
 // setup api keys
-let api_key_openweathermap = api_keys.openweathermap;
-let api_key_watson_username = api_keys.watson_username;
-let api_key_watson_password = api_keys.watson_password;
-let api_key_giphy = api_keys.giphy;
+let api_key_openweathermap = settings.openweathermap;
+let api_key_watson_username = settings.watson_username;
+let api_key_watson_password = settings.watson_password;
+let api_key_giphy = settings.giphy;
 // and set them.
 weather_parser.setApiKey(api_key_openweathermap);
 voice_recognition.setApiKey(api_key_watson_username, api_key_watson_password, botToken);
@@ -90,7 +90,7 @@ msToHumanReadable = (ms) => {
     return output;
 }
 
-lastDay(y,m) => {
+lastDay = (y,m) => {
   return new Date(y, m +1, 0).getDate();
 }
 
@@ -468,6 +468,7 @@ bytesToSize = (bytes) => {
 };
 
 bot.command(['/space', '/disk', '/diskspace', '/ds'], (ctx) => {
+  let chatId = ctx.update.message.chat.id;
   diskspace.check(diskspace_path, function (err, result)
   { 
     let output = "*Diskspace at* " + diskspace_path + "\r\n";
