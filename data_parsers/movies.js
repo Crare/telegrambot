@@ -28,8 +28,8 @@ exports.getMoviesOnTV = (callback) => {
 				//   	console.log('Saved!');
 				// });
 
-				let output = "Movies coming up in TV: \r\n";
-				output += "[dd.MM HH:mm (channel, rating, year) name.]\r\n";
+				let output = "<b>Movies coming up in TV:</b> \r\n";
+				output += "[dd.MM. HH:mm (year, rating, channel) name.]\r\n";
 
 				let tomorrowMessage = false;
 				let movies = data.today.movie;
@@ -47,7 +47,7 @@ exports.getMoviesOnTV = (callback) => {
 						output += "-\r\n";
 					}
 					console.log(day + "." + month + " " + hours + ":" + minutes + " (" + movies[i].broadcast.channel + ", " + movies[i].rating.value + ", " + movies[i].year + ") " +  movies[i].name);
-					output += day + "." + month + " " + hours + ":" + minutes + " (" + movies[i].broadcast.channel + ", " + movies[i].rating.value + ", " + movies[i].year + ") " +  movies[i].name + "\r\n";
+					output += day + "." + month + ". " + hours + ":" + minutes + " (" + movies[i].year + ", " + movies[i].rating.value + ", " + movies[i].broadcast.channel + ") <b>" +  movies[i].name + "</b> [<a href='" + movies[i].item +  "'>link</a>]" + "\r\n";
 				}
 
 				callback(output);
