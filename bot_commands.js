@@ -27,6 +27,7 @@ const voice_recognition = require('./data_parsers/voice_recognition.js');
 const giphy_handler = require('./data_parsers/giphy.js');
 const reminder = require('./data_parsers/reminder.js');
 const sunrise_sunset = require('./data_parsers/sunrise-sunset.js');
+const movies = require('./data_parsers/movies.js');
 
 // commands
 cmdargs
@@ -101,6 +102,7 @@ bot.command(['/h', '/help', '/help@'+botName], (ctx) => {
   output += "/f Flip a coin: output heads or tails.\r\n";
   output += "/gif Get gifs! \r\n";
   output += "/h Get this help message. \r\n";
+  output += "/movies get movies coming up in TV.\r\n";
   output += "/n News data from YLE. \r\n";
   output += "/p Get provinces for news areas. \r\n";
   output += "/re Set a reminder to your future self!\r\n";
@@ -483,6 +485,21 @@ bot.command(['/space', '/disk', '/diskspace', '/ds'], (ctx) => {
     })
   });
 })
+
+
+// Get movies on TV
+bot.command(['/movies', '/films'], (ctx) => {
+  console.log("get movies called");
+  let chatId = ctx.update.message.chat.id;
+  movies.getMoviesOnTV( (output) => {
+    let extras = {parse_mode: 'Html'};
+    bot.telegram.sendMessage(chatId, output, extras).then(function() {
+      console.log("Movies message sent.");
+    })
+  })
+})
+
+
 
 // handle errors, this won't find them all, only the ones that throw error.
 bot.catch((err) => {

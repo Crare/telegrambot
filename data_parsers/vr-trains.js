@@ -368,9 +368,11 @@ exports.haeJunatReitille = (start, end, trainAmount, haeCargoJunat, callBack) =>
              data.push(chunk);
          }).on('end', function() {
              var buffer = Buffer.concat(data);
-             var responsedata = JSON.parse(buffer.toString('utf-8'));
-             // console.log(responsedata);
-             junat = parseJunat(responsedata, lahto, maaranpaa);
+             console.log(typeof buffer);
+             if (typeof buffer == "object") {
+              var responsedata = JSON.parse(buffer.toString('utf-8'));
+              // console.log(responsedata);
+              junat = parseJunat(responsedata, lahto, maaranpaa);
                if(junat != undefined) {
                  junat.targetAsema = lahto;
                  junat.targetAsema2 = maaranpaa;
@@ -386,6 +388,9 @@ exports.haeJunatReitille = (start, end, trainAmount, haeCargoJunat, callBack) =>
                  else {output += maaranpaa.lyhenne;}
                  callBack(output);
                }
+              } else {
+                callBack("Error happened while getting traindata, try again.");
+              }
          });
 
          }).on('error', (e) => {
