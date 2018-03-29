@@ -29,6 +29,10 @@ random gif or semi-random with tag.
 ![alt tag](https://github.com/Crare/telegrambot/blob/master/example_images/snip7.PNG)
 
 # api sources
+Telegrambot API: https://core.telegram.org/bots/api
+
+Telegraf.js API: http://telegraf.js.org/#/
+
 giphy gifs: https://developers.giphy.com/
 
 sunrise sunset: https://api.sunrise-sunset.org/
