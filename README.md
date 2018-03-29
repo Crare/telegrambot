@@ -33,18 +33,19 @@ Telegrambot API: https://core.telegram.org/bots/api
 
 Telegraf.js API: http://telegraf.js.org/#/
 
-giphy gifs: https://developers.giphy.com/
+Giphy gifs: https://developers.giphy.com/
 
-sunrise sunset: https://api.sunrise-sunset.org/
+Movies coming from TV, API from leffatykki: http://www.leffatykki.com/api
 
-train data traffic in Finland: https://rata.digitraffic.fi/
+Sunrise sunset: https://api.sunrise-sunset.org/
 
-watson speach recognition: https://www.ibm.com/watson/developer/
+Train data traffic in Finland: https://rata.digitraffic.fi/
 
-yle news: https://yle.fi/uutiset/rss
+Watson speach recognition: https://www.ibm.com/watson/developer/
+
+Yle news: https://yle.fi/uutiset/rss
 
 ## unused apis currently
-I'm adding support for movies coming from TV: http://www.leffatykki.com/api
 
 and/or elisa viihde API: https://github.com/enyone/elisaviihde
 
