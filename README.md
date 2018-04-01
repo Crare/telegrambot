@@ -29,18 +29,23 @@ random gif or semi-random with tag.
 ![alt tag](https://github.com/Crare/telegrambot/blob/master/example_images/snip7.PNG)
 
 # api sources
-giphy gifs: https://developers.giphy.com/
+Telegrambot API: https://core.telegram.org/bots/api
 
-sunrise sunset: https://api.sunrise-sunset.org/
+Telegraf.js API: http://telegraf.js.org/#/
 
-train data traffic in Finland: https://rata.digitraffic.fi/
+Giphy gifs: https://developers.giphy.com/
 
-watson speach recognition: https://www.ibm.com/watson/developer/
+Movies coming from TV, API from leffatykki: http://www.leffatykki.com/api
 
-yle news: https://yle.fi/uutiset/rss
+Sunrise sunset: https://api.sunrise-sunset.org/
+
+Train data traffic in Finland: https://rata.digitraffic.fi/
+
+Watson speach recognition: https://www.ibm.com/watson/developer/
+
+Yle news: https://yle.fi/uutiset/rss
 
 ## unused apis currently
-I'm adding support for movies coming from TV: http://www.leffatykki.com/api
 
 and/or elisa viihde API: https://github.com/enyone/elisaviihde
 
