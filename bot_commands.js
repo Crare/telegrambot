@@ -405,7 +405,7 @@ reminder.loadRemindersJSON(reminders_store_path, (reminders_array) => {
 // REMINDER
 bot.command(['/remind', '/re'], (ctx) => {
   console.log("remind command called");
-  console.log(ctx.message);
+  //console.log(ctx.message);
   let chatId = ctx.update.message.chat.id;
   let user_id = ctx.message.from.id;
   let username = ctx.message.from.username;
