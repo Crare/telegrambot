@@ -83,7 +83,7 @@ exports.createNewReminder = (chatId, user_id, username, unparsed_text, callback,
     try {
         if(isNaN(chatId)) { throw 'chatId is NaN!'; }
         if(isNaN(user_id)) { throw 'user_id is NaN!'; }
-        if(typeof username != 'string') { throw 'username is not String!'; }
+        if(typeof username != 'string') { console.log(typeof username); throw 'username is not String!'; }
         if(typeof unparsed_text != 'string') { throw 'unparsed_text is not String!'; }
         if(callback == undefined) { throw 'callback is undefined!'; }
 

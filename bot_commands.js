@@ -405,9 +405,14 @@ reminder.loadRemindersJSON(reminders_store_path, (reminders_array) => {
 // REMINDER
 bot.command(['/remind', '/re'], (ctx) => {
   console.log("remind command called");
+  console.log(ctx.message);
   let chatId = ctx.update.message.chat.id;
   let user_id = ctx.message.from.id;
   let username = ctx.message.from.username;
+  if (username == undefined) {
+    // no username, use firstname
+    username = ctx.message.from.first_name;
+  }
   let unparsed_text = ctx.update.message.text;
   let extras = {parse_mode: 'HTML'};
 
