@@ -3,3 +3,5 @@ audio_file.ogg
 sftp-config.json
 /node_modules/*
 /data/*
+/data/reminders.json
+/data/reminders_test.json

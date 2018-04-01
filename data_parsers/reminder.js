@@ -69,7 +69,7 @@ exports.setupReminderRunning = (reminder, bot, callback) => {
 }
 
 exports.loadRemindersJSON = (path, callback) => {
-    fs.open(path, 'w', function(err, data) {
+    fs.readFile(path, function(err, data) {
         if (err) throw err;
         let reminders = JSON.parse(data);
         for(let i = 0; i < reminders.length; i++) {

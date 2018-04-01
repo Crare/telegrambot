@@ -418,7 +418,7 @@ bot.command(['/remind', '/re'], (ctx) => {
 
   try {
     reminder.createNewReminder(chatId, user_id, username, unparsed_text, function(reminder_obj) {
-      console.log(reminder_obj);
+      //console.log(reminder_obj);
       reminders.push(reminder_obj);
       reminder.saveRemindersJSON(reminders, reminders_store_path);
 
