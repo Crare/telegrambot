@@ -492,6 +492,19 @@ bot.command(['/space', '/disk', '/diskspace', '/ds'], (ctx) => {
 })
 
 
+
+// Get movies on TV 2
+bot.command(['/movies2', '/films2'], (ctx) => {
+  console.log("get movies2 called");
+  let chatId = ctx.update.message.chat.id;
+  movies.getAmpparitMoviesOnTV( (output) => {
+    let extras = {parse_mode: 'Html'};
+    bot.telegram.sendMessage(chatId, output, extras).then(function() {
+      console.log("Movies message sent.");
+    })
+  })
+})
+
 // Get movies on TV
 bot.command(['/movies', '/films'], (ctx) => {
   console.log("get movies called");
