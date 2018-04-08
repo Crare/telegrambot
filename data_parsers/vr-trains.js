@@ -38,6 +38,7 @@ tulostaJunienTiedot = function(lahtevatJunat, haeCargoJunat, trainAmountMax) {
     output += "\r\n\r\n";
 
      for(i = 0; i < lahtevatJunat.length; i++) {
+
       if(!haeCargoJunat && lahtevatJunat[i].kategoria == "Cargo") { continue; }
       if(haeCargoJunat && lahtevatJunat[i].kategoria != "Cargo") {continue; }
          if(lahtevatJunat[i].targetLahtoAika != undefined) {
@@ -105,6 +106,8 @@ tulostaJunienTiedot = function(lahtevatJunat, haeCargoJunat, trainAmountMax) {
         output += e_cross_mark;
        }
 
+       output += ' [link](https://www.vr.fi/cs/vr/fi/juku#train=' + lahtevatJunat[i].nro + ')';
+
        output += "\r\n";
        trainAmount++;
        if(trainAmount == trainAmountMax) {break;}
@@ -163,7 +166,9 @@ haeAsemat = function(callback) {
     });
   });
 }
-
+haeAsemat((_asemat) => {
+  asemat = _asemat;
+});
 
 haePaikkaKokonimi = function(lyhenne) {
   for(x = 0; x < asemat.length; x++) {
@@ -299,7 +304,9 @@ exports.haeAsemanTiedot = (asema, callBack)=> {
     output += ", " + asema.maakoodi;
   }
   if(asema.lyhenne) {
-    output += " shortcode: " + asema.lyhenne + "\r\n";
+    let link = "https://www.vr.fi/cs/vr/fi/juku#station=" + asema.lyhenne;
+    link = encodeURI(link);
+    output += " shortcode: " + asema.lyhenne + " [link](" + link + ")" + "\r\n";
   }
   if(asema.lat && asema.lon) {
     output += "latitude: " + asema.lat + ", longitude: " + asema.lon + "\r\n";

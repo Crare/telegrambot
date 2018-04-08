@@ -194,6 +194,26 @@ bot.command(['/t', '/trains', '/junat'], (ctx) => {
   }
 })
 
+// get train sations
+bot.command(['/st', '/station'], (ctx) => {
+  console.log("trains command called");
+  let text = ctx.update.message.text.split(' ');
+  if(text.length == 2) {
+    let station_name = text[1];
+    let haeCargoJunat = false;
+    train_parser.haeAsemanTiedot(station_name, (output) => {
+      var chatId = ctx.update.message.chat.id;
+      var extras = {parse_mode: 'Markdown'};
+      bot.telegram.sendMessage(chatId, output, extras).then(function() {
+        console.log("Message sent.");
+      })
+    });
+  } else {
+    ct.reply("Give station name after /station for example: /station Pasila");
+  }
+})
+
+
 // WEATHER
 bot.command(['/w', '/weather', '/sää', '/saa'], (ctx) => {
   console.log("weather command called");
