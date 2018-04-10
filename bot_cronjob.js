@@ -10,8 +10,8 @@
 /*
 * DEBUG RUN:
 * in commandline:
-* node juhis_bot3.js --test --MorningMessage
-* THIS CODE IS RUN IN CRONTAB. telegram commands are in juhis_bot3_commands.js
+* node bot_cronjob.js --test --morning
+* THIS CODE IS RUN IN CRONTAB. telegram commands are in bot_commands.js
 */
 
 const Telegraf = require('telegraf')
@@ -37,20 +37,20 @@ cmdargs
   .version('0.0.1')
   .option('-cronjob, --cronjob', 'activates telegram bot that runs only once and send message to chats')
   .option('--test', 'send message as test to Juho')
-  .option('-morning, --MorningMessage', 'Show morning message')
-  .option('-evening, --EveningMessage', 'Show evening message')
-  .option('-friday, --FridayMessage', 'Show friday message')
-  .option('-weekend, --WeekendMessage', 'Show weekend message')
-  .option('-diskspace, --diskspace', 'Displays diskspace at /var/www/html/ used,total,free space.')
+  .option('--morning', 'Show morning message')
+  .option('--evening', 'Show evening message')
+  .option('--friday', 'Show friday message')
+  .option('--weekend', 'Show weekend message')
+  .option('--diskspace', 'Displays diskspace at /var/www/html/ used,total,free space.')
 .parse(process.argv);
 
 // setup bot
 let botToken = settings.prod_bot_key;
-let sendToChatId = productionChatId;
+let sendToChatId = settings.productionChatId;
 let botName = settings.botName;
 if(cmdargs.test) {
   botToken = settings.test_bot_key;
-  sendToChatId = testChatId;
+  sendToChatId = settings.testChatId;
   botName = settings.testBotName;
 }
 const bot = new Telegraf(botToken)
@@ -126,7 +126,7 @@ show_morning_message = (chatId) => {
     train_parser.haeJunatReitille("Pasila", "Lahti", 5, false, (trains) => {
       news_parser.getYleNews(undefined, defaultLang, 5, (news) => {
         sunrise_sunset.getSunDataAtLocation(place, (sun_data) => {
-          happenings.getHappeningsTodayString(happenings_json_path, (happenings_string) => {
+          happenings.getHappeningsTodayString( (happenings_string) => {
 
             // get random morning message
             var output = "";
@@ -285,11 +285,11 @@ getDiskSpace = (path, chatId) => {
 }
 
 // call message functions, depending on arguments
-if(cmdargs.MorningMessage) {
+if(cmdargs.morning) {
   console.log("morning message");
   show_morning_message(sendToChatId);
 
-} else if (cmdargs.EveningMessage) {
+} else if (cmdargs.evening) {
   console.log("evening message");
   show_evening_message(sendToChatId);
 
@@ -297,11 +297,11 @@ if(cmdargs.MorningMessage) {
   console.log("diskspace");
   getDiskSpace(diskspaceCheckLocation, sendToChatId);
 
-} else if (cmdargs.FridayMessage) {
+} else if (cmdargs.friday) {
   console.log("FridayMessage");
   show_friday_message(sendToChatId);
 
-} else if (cmdargs.WeekendMessage) {
+} else if (cmdargs.weekend) {
   console.log("WeekendMessage");
   show_weekend_message(sendToChatId);
 }

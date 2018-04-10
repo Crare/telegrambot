@@ -275,6 +275,12 @@ parseJunat = function(responsedata, lahto, maaranpaa) {
       }
       junat.push(juna);
   }
+
+  // sort by departing time.
+  junat.sort(function(a, b) {
+    return a.target2LahtoAika.getTime() - b.target2LahtoAika.getTime();
+  });
+
   return junat;
 }
 
