@@ -2,8 +2,12 @@
 // in chat where the bot is running send message "/id" or "/chatId" to chat.
 // add chat id to your settings.json
 
+
+const fs = require('fs')
+settings = JSON.parse(fs.readFileSync('./settings.json'));
+
 const Telegraf = require('telegraf');
-bot_token = "575059157:AAHlQ4fTmpr1rBMwe2y-WpUDq8jfPRex0XA"; // '533294352:AAHpzJ9WECS0--1XBEk95ab8c-eI9_kMmY4'
+bot_token = settings.test_bot_key;
 const bot = new Telegraf(bot_token);
 
 
