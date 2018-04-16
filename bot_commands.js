@@ -28,6 +28,8 @@ const giphy_handler = require('./data_parsers/giphy.js');
 const reminder = require('./data_parsers/reminder.js');
 const sunrise_sunset = require('./data_parsers/sunrise-sunset.js');
 const movies = require('./data_parsers/movies.js');
+const flagdays = require('./data_parsers/flagdays.js');
+const holidays = require('./data_parsers/holidays.js');
 
 // commands
 cmdargs
@@ -536,6 +538,31 @@ bot.command(['/movies', '/films'], (ctx) => {
     })
   })
 })
+
+// get chat id
+bot.command(['/chatId', '/id'], (ctx) => {
+  console.log("This chat's id is: " + ctx.update.message.chat.id);
+  ctx.reply("This chat's id is: " + ctx.update.message.chat.id);
+});
+
+
+// get flagging-day today
+bot.command(['/flag', '/flagday'], (ctx) => {
+  console.log("flagday command called.");
+  flagdays.getFlagdayToday((output)=> {
+    ctx.reply(output);
+  });
+});
+
+// get holiday today
+bot.command(['/hday', '/holiday'], (ctx) => {
+  console.log("holiday command called.");
+  holidays.getHolidayToday((output)=> {
+    ctx.reply(output);
+  });
+});
+
+
 
 
 
