@@ -35,8 +35,7 @@ const happenings = require('./data_parsers/happenings.js');
 // commands
 cmdargs
   .version('0.0.1')
-  .option('-cronjob, --cronjob', 'activates telegram bot that runs only once and send message to chats')
-  .option('--test', 'send message as test to Juho')
+  .option('--test', 'send messages to test bot instead of production bot.')
   .option('--morning', 'Show morning message')
   .option('--evening', 'Show evening message')
   .option('--friday', 'Show friday message')
