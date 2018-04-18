@@ -10,16 +10,9 @@
     "testChatId": "",
     "productionChatId": "",
     "morning_greetings": [
-        "Gooooooooood morrrrning Vietnammmm!",
-        "Gooooooooood morrrrning Lahti!",
-        "Good morning Finland!",
         "Good morning!",
         "Good mornin'",
         "Hyvää huomenta!",
-        "Good morning, good morning, good",
-        "Good morning you sexy beasts!",
-        "Good morning, how did you sleep?",
-        "Good morning Beatiful!",
         "Morning starts with coffee right?",
         "Sunbeams will soon smile through, good mornin', good mornin', to you",
         "Hyvää huomenta Suomi, hyvin pyyhkii, sun poikas valvoo taas ja ahkeroi",
@@ -27,5 +20,15 @@
         "It's a new great day ahead!",
         "Time to wake up! It's a great day ahead!",
         "Good morning, did you miss me?"
-    ]
+    ],
+    "morning_trains_from": "Lahti", 
+    "morning_trains_to": "Pasila", 
+    "evening_trains_from": "Pasila", 
+    "evening_trains_to": "Lahti", 
+    "morning_weather_at": "Helsinki",
+    "evening_weather_at": "Helsinki",
+    "weekend_weather_at": "Helsinki",
+    "sun_at_lat": 60.1699,
+    "sun_at_lon": 24.9384,
+    "countrycode": "FI"
 }

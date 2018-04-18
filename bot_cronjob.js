@@ -119,10 +119,9 @@ getWeekNumber = () => {
 
 show_morning_message = (chatId) => {
   console.log("setting daily morning message.");
-  var place = { nimi: "Lahti", countrycode: "FI", lat: 60.9827, lng: 25.6612};
-
+  let place = { nimi: settings.morning_weather_at, countrycode: settings.countrycode, lat: settings.sun_at_lat, lng: settings.sun_at_lon}
   weather_parser.getOpenWeatherData(place, 1, (weather_forecast) => {
-    train_parser.haeJunatReitille("Pasila", "Lahti", 5, false, (trains) => {
+    train_parser.haeJunatReitille(settings.morning_trains_from, settings.morning_trains_to, 5, false, (trains) => {
       news_parser.getYleNews(undefined, defaultLang, 5, (news) => {
         sunrise_sunset.getSunDataAtLocation(place, (sun_data) => {
           happenings.getHappeningsTodayString( (happenings_string) => {
@@ -172,11 +171,11 @@ show_morning_message = (chatId) => {
 show_friday_message = (chatId) => {
   console.log("setting friday message.");
   var place = new Object();
-  place.nimi = "Lahti";
-  place.countrycode = "FI"; // for now
+  place.nimi = settings.morning_weather_at;
+  place.countrycode = settings.countrycode;
 
   weather_parser.getOpenWeatherData(place, 3, (weather_forecast) => {
-    train_parser.haeJunatReitille("Lahti", "Pasila", 10, false, (trains) => {
+    train_parser.haeJunatReitille(settings.evening_trains_from, settings.evening_trains_to, 10, false, (trains) => {
        news_parser.getYleNews(undefined, defaultLang, 5, (news) => {
 
         var output = "*IT'S FRIDAY YAY!" + "*\r\n";
@@ -205,24 +204,18 @@ show_friday_message = (chatId) => {
 
 show_weekend_message = (chatId) => {
   console.log("setting weekend message.");
-  var paikka = new Object();
-  paikka.nimi = "Lahti";
-  paikka.countrycode = "FI"; // for now
+  var place = new Object();
+  place.nimi = settings.weekend_weather_at;
+  place.countrycode = settings.countrycode;
 
-  weather_parser.getOpenWeatherData(paikka, 2, (weather_forecast_lahti) => {
+  weather_parser.getOpenWeatherData(place, 2, (weather_forecast) => {
 
-    var paikka = new Object();
-    paikka.nimi = "Helsinki";
-    paikka.countrycode = "FI"; // for now
-
-    weather_parser.getOpenWeatherData(paikka, 2, (weather_forecast_helsinki) => {
       happenings.getHappeningsTodayString( (happenings_string) => {
         news_parser.getYleNews(undefined, defaultLang, 5, (news) => {
 
           var output = "*Have a nice weekend!" + "*\r\n";
           output += happenings_string + "\r\n";
-          output += weather_forecast_helsinki + "\r\n";
-          output += weather_forecast_lahti + "\r\n";
+          output += weather_forecast + "\r\n";
           output += news;
 
           var extras = {parse_mode: 'Markdown'};
@@ -232,18 +225,17 @@ show_weekend_message = (chatId) => {
 
         });
       });
-    });
   });
 }
 
 show_evening_message = (chatId) => {
   console.log("setting daily evening message.");
   var place = new Object();
-  place.nimi = "Lahti";
-  place.countrycode = "FI"; // for now
+  place.nimi = settings.evening_weather_at;
+  place.countrycode = settings.countrycode;
 
   weather_parser.getOpenWeatherData(place, 2, (weather_forecast) => {
-    train_parser.haeJunatReitille("Lahti", "Pasila", 10, false, (trains) => {
+    train_parser.haeJunatReitille(settings.evening_trains_from, settings.evening_trains_to, 10, false, (trains) => {
        news_parser.getYleNews(undefined, defaultLang, 5, (news) => {
 
         var output = "*Good afternoon!" + "*\r\n";
