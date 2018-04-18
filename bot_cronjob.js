@@ -1,3 +1,23 @@
+//waterfall test
+
+const async = require('async');
+
+/*async.waterfall([
+    function(callback) {
+        callback(null, 'one', 'two');
+    },
+    function(arg1, arg2, callback) {
+        callback(null, 'three');
+    },
+    function(arg1, callback) {
+        callback(null, 'done');
+    }
+], function (err, result) {
+    // result now equals 'done'
+    console.log(result);
+});
+*/
+
 /* 
 * This telegrambot is made by Juho. Hi! C: https://github.com/crare/telegrambot
 * parsers can be found in folder ./data_parsers
@@ -118,69 +138,125 @@ getWeekNumber = () => {
 }
 
 show_morning_message = (chatId) => {
-  console.log("setting daily morning message.");
-  let place = { nimi: settings.morning_weather_at, countrycode: settings.countrycode, lat: settings.sun_at_lat, lng: settings.sun_at_lon}
-  weather_parser.getOpenWeatherData(place, 1, (weather_forecast) => {
-    train_parser.haeJunatReitille(settings.morning_trains_from, settings.morning_trains_to, 5, false, (trains) => {
-      news_parser.getYleNews(undefined, defaultLang, 5, (news) => {
-        sunrise_sunset.getSunDataAtLocation(place, (sun_data) => {
-          happenings.getHappeningsTodayString( (happenings_string) => {
+    console.log("setting daily morning message.");
+    let place = { nimi: settings.morning_weather_at, countrycode: settings.countrycode, lat: settings.sun_at_lat, lng: settings.sun_at_lon}
+  
+    let weather = "";
+    let train = "";
+    let news = "";
+    let sunrise = "";
+    let happening = "";
 
-            // get random morning message
-            var output = "";
-            var rand_i = Math.floor(Math.random() * morning_greetings.length);
-            output += "" + morning_greetings[rand_i] + "\r\n";
-            console.log(morning_greetings[rand_i]);
-            console.log(rand_i);
+    async.waterfall([
+        function(callback) {
+            weather_parser.getOpenWeatherData(place, 1, (weather_forecast) => {
+                weather = weather_forecast;
+                callback();
+            });
+        },
+        function(callback) {
+            train_parser.haeJunatReitille(settings.morning_trains_from, settings.morning_trains_to, 5, false, (trains) => {
+                train = trains;
+                callback();
+            });
+        },
+        function(callback) {
+            news_parser.getYleNews(undefined, defaultLang, 5, (news_) => {
+                news = news_;
+                callback();
+            });
+        },
+        function(callback) {
+            sunrise_sunset.getSunDataAtLocation(place, (sun_data) => {
+                sunrise = sun_data;
+                callback();
+            });
+        },
+        function(callback) {
+            happenings.getHappeningsTodayString((happenings_string) => {
+                happening = happenings_string;
+                callback();
+            });
+        }
+        // function(callback) {
+        // },
+    ], function (err, result) {
 
-            var date = new Date();
-            hours = date.getHours();
-            if(hours < 10) {hours = "0"+hours;}
-            minutes = date.getMinutes()
-            if(minutes < 10) {minutes = "0"+minutes;}
+        // get random morning message
+        var output = "";
+        var rand_i = Math.floor(Math.random() * morning_greetings.length);
+        output += "" + morning_greetings[rand_i] + "\r\n";
+        console.log(morning_greetings[rand_i]);
+        console.log(rand_i);
 
-            let week_number = getWeekNumber();
-            output += "*Today is " + getDayName(date.getDay()) + " " + date.getDate() + "." + (date.getMonth()+1) + "." + date.getFullYear() + ". Week "+ week_number + ".*\r\n";
-            output += happenings_string + "\r\n";
-            output += weather_forecast + "\r\n";
-            output += sun_data + "\r\n\r\n";
-            output += trains + "\r\n";
-            output += news;
+        var date = new Date();
+        hours = date.getHours();
+        if(hours < 10) {hours = "0"+hours;}
+        minutes = date.getMinutes()
+        if(minutes < 10) {minutes = "0"+minutes;}
 
-            var extras = {parse_mode: 'Markdown'};
-            bot.telegram.sendMessage(chatId, output, extras).then(() => {
-              console.log("Send daily message.");
-              if(date.getDay() == 1 || cmdargs.test) { // 1 == monday
-                giphy_handler.getRandomGif("monday", (gif) => {
-                  if(gif != undefined) {
-                    bot.telegram.sendDocument(chatId, gif).then(() => {
-                      console.log("Send monday gif.");
-                    })
-                  }
-                });
+        let week_number = getWeekNumber();
+        output += "*Today is " + getDayName(date.getDay()) + " " + date.getDate() + "." + (date.getMonth()+1) + "." + date.getFullYear() + ". Week "+ week_number + ".*\r\n";
+        output += happening + "\r\n";
+        output += weather + "\r\n";
+        output += sunrise + "\r\n\r\n";
+        output += train + "\r\n";
+        output += news;
+        
+        var extras = {parse_mode: 'Markdown'};
+        bot.telegram.sendMessage(chatId, output, extras).then(() => {
+          console.log("Send daily morning message.");
+
+          if(date.getDay() == 1 || cmdargs.test) { // 1 == monday
+            giphy_handler.getRandomGif("monday", (gif) => {
+              if(gif != undefined) {
+                bot.telegram.sendDocument(chatId, gif).then(() => {
+                  console.log("Send monday gif.");
+                })
               }
             });
-
-          });
+          }
         });
-      });
+
     });
-  });
 }
 
 show_friday_message = (chatId) => {
-  console.log("setting friday message.");
-  var place = new Object();
-  place.nimi = settings.morning_weather_at;
-  place.countrycode = settings.countrycode;
+    console.log("setting friday message.");
+    var place = new Object();
+    place.nimi = settings.morning_weather_at;
+    place.countrycode = settings.countrycode;
 
-  weather_parser.getOpenWeatherData(place, 3, (weather_forecast) => {
-    train_parser.haeJunatReitille(settings.evening_trains_from, settings.evening_trains_to, 10, false, (trains) => {
-       news_parser.getYleNews(undefined, defaultLang, 5, (news) => {
+    let weather = "";
+    let train = "";
+    let news = "";
+
+    async.waterfall([
+        function(callback) {
+            weather_parser.getOpenWeatherData(place, 3, (weather_forecast) => {
+                weather = weather_forecast;
+                callback();
+            });
+        },
+        function(callback) {
+            train_parser.haeJunatReitille(settings.evening_trains_from, settings.evening_trains_to, 5, false, (trains) => {
+                train = trains;
+                callback();
+            });
+        },
+        function(callback) {
+            news_parser.getYleNews(undefined, defaultLang, 5, (news_) => {
+                news = news_;
+                callback();
+            });
+        },
+        // function(callback) {
+        // },
+    ], function (err, result) {
 
         var output = "*IT'S FRIDAY YAY!" + "*\r\n";
-        output += weather_forecast + "\r\n";
-        output += trains + "\r\n";
+        output += weather + "\r\n";
+        output += train + "\r\n";
         output += news;
 
         var extras = {parse_mode: 'Markdown'};
@@ -197,35 +273,52 @@ show_friday_message = (chatId) => {
 
           });
         })
-      });
+
     });
-  });
 }
 
 show_weekend_message = (chatId) => {
-  console.log("setting weekend message.");
-  var place = new Object();
-  place.nimi = settings.weekend_weather_at;
-  place.countrycode = settings.countrycode;
+    console.log("setting weekend message.");
+    var place = new Object();
+    place.nimi = settings.weekend_weather_at;
+    place.countrycode = settings.countrycode;
 
-  weather_parser.getOpenWeatherData(place, 2, (weather_forecast) => {
+    let weather = "";
+    let news = "";
+    let happening = "";
 
-      happenings.getHappeningsTodayString( (happenings_string) => {
-        news_parser.getYleNews(undefined, defaultLang, 5, (news) => {
+    async.waterfall([
+        function(callback) {
+            weather_parser.getOpenWeatherData(place, 3, (weather_forecast) => {
+                weather = weather_forecast;
+                callback();
+            });
+        },
+        function(callback) {
+            happenings.getHappeningsTodayString( (happenings_string) => {
+                happening = happenings_string;
+                callback();
+            });
+        },
+        function(callback) {
+            news_parser.getYleNews(undefined, defaultLang, 5, (news_) => {
+                news = news_;
+                callback();
+            });
+        },
+        // function(callback) {
+        // },
+    ], function (err, result) {
+        var output = "*Have a nice weekend!" + "*\r\n";
+        output += happening + "\r\n";
+        output += weather + "\r\n";
+        output += news;
 
-          var output = "*Have a nice weekend!" + "*\r\n";
-          output += happenings_string + "\r\n";
-          output += weather_forecast + "\r\n";
-          output += news;
-
-          var extras = {parse_mode: 'Markdown'};
-          bot.telegram.sendMessage(chatId, output, extras).then(() => {
+        var extras = {parse_mode: 'Markdown'};
+        bot.telegram.sendMessage(chatId, output, extras).then(() => {
             console.log("Send weekend message.");
-          })
-
-        });
-      });
-  });
+        })
+    });
 }
 
 show_evening_message = (chatId) => {
@@ -234,22 +327,44 @@ show_evening_message = (chatId) => {
   place.nimi = settings.evening_weather_at;
   place.countrycode = settings.countrycode;
 
-  weather_parser.getOpenWeatherData(place, 2, (weather_forecast) => {
-    train_parser.haeJunatReitille(settings.evening_trains_from, settings.evening_trains_to, 10, false, (trains) => {
-       news_parser.getYleNews(undefined, defaultLang, 5, (news) => {
+    let weather = "";
+    let train = "";
+    let happening = "";
+
+    async.waterfall([
+        function(callback) {
+            weather_parser.getOpenWeatherData(place, 3, (weather_forecast) => {
+                weather = weather_forecast;
+                callback();
+            });
+        },
+        function(callback) {
+            train_parser.haeJunatReitille(settings.evening_trains_from, settings.evening_trains_to, 5, false, (trains) => {
+                train = trains;
+                callback();
+            });
+        },
+        function(callback) {
+            news_parser.getYleNews(undefined, defaultLang, 5, (news_) => {
+                news = news_;
+                callback();
+            });
+        },
+        // function(callback) {
+        // },
+    ], function (err, result) {
 
         var output = "*Good afternoon!" + "*\r\n";
-        output += weather_forecast + "\r\n";
-        output += trains + "\r\n";
+        output += weather + "\r\n";
+        output += train + "\r\n";
         output += news;
         var extras = {parse_mode: 'Markdown'};
 
         bot.telegram.sendMessage(chatId, output, extras).then(() => {
-          console.log("Send daily iltapaiva message.");
+          console.log("Send daily evening message.");
         })
-      });
+
     });
-  });
 }
 
 bytesToSize = (bytes) => {
