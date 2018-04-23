@@ -30,5 +30,6 @@
     "weekend_weather_at": "Helsinki",
     "sun_at_lat": 60.1699,
     "sun_at_lon": 24.9384,
-    "countrycode": "FI"
+    "countrycode": "FI",
+    "ruuvitag": "",
 }

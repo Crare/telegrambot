@@ -30,6 +30,7 @@ const sunrise_sunset = require('./data_parsers/sunrise-sunset.js');
 const movies = require('./data_parsers/movies.js');
 const flagdays = require('./data_parsers/flagdays.js');
 const holidays = require('./data_parsers/holidays.js');
+const ruuvi = require('./data_parsers/ruuvi.js');
 
 // commands
 cmdargs
@@ -558,6 +559,15 @@ bot.command(['/flag', '/flagday'], (ctx) => {
 bot.command(['/hday', '/holiday'], (ctx) => {
   console.log("holiday command called.");
   holidays.getHolidayToday((output)=> {
+    ctx.reply(output);
+  });
+});
+
+// get ruuvitag info
+bot.command(['/tag','/ruuvi' ,'/ruuvitag'], (ctx)=> {
+  console.log("ruuvitag command called.");
+  ruuvi.getRuuviTagData(settings.ruuvitag, (output) => {
+    console.log(output);
     ctx.reply(output);
   });
 });
