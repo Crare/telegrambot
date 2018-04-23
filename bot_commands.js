@@ -566,7 +566,8 @@ bot.command(['/hday', '/holiday'], (ctx) => {
 // get ruuvitag info
 bot.command(['/tag','/ruuvi' ,'/ruuvitag'], (ctx)=> {
   console.log("ruuvitag command called.");
-  ruuvi.getRuuviTagData(settings.ruuvitag, (output) => {
+  let tag = {id: settings.ruuvitag_id, name: settings.ruuvitag_name};
+  ruuvi.getRuuviTagData(tag, (output) => {
     console.log(output);
     ctx.reply(output);
   });
