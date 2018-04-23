@@ -22,9 +22,9 @@ exports.getRuuviTagData = (tag, callBack) => {
 	  		let output = "";
 	  		if(results[0].length > 0) {
 		  		output = "<b>Ruuvitag " + ruuvitag.name + "</b>\r\n";
-		  		output += "Temperature: " + results[0].temperature + "\r\n";
-		  		output += "Humidity: " + results[0].humidity + "\r\n";
-		  		output += "Pressure: " + results[0].pressure + "\r\n";
+		  		output += "Temperature: " + ruuvitag.temperature + "\r\n";
+		  		output += "Humidity: " + ruuvitag.humidity + "\r\n";
+		  		output += "Pressure: " + ruuvitag.pressure + "\r\n";
 		  	} else {
 		  		output = "Sorry! No tag found..";
 		  	}
