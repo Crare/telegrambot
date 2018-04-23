@@ -567,10 +567,14 @@ bot.command(['/hday', '/holiday'], (ctx) => {
 bot.command(['/tag','/ruuvi' ,'/ruuvitag'], (ctx)=> {
   console.log("ruuvitag command called.");
   let tag = {id: settings.ruuvitag_id, name: settings.ruuvitag_name};
+  let chatId = ctx.update.message.chat.id;
   ruuvi.getRuuviTagData(tag, (output) => {
     console.log(output);
-    ctx.reply(output);
-  });
+    let extras = {parse_mode: 'Html'};
+    bot.telegram.sendMessage(chatId, output, extras).then(function() {
+      console.log("Movies message sent.");
+    })
+  })
 });
 
 
