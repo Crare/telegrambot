@@ -17,7 +17,7 @@ exports.getRuuviTagData = (tag, callBack) => {
 	  	} else {
 	  		// results is an array consisting of messages collected during execution
 	  		console.log('results: %j', results);
-	  		let ruuvitag = JSON.parse(results[0]);
+	  		let ruuvitag = JSON.parse(results[0].replace("'", '"'));
 	  		ruuvitag.name = tag.name;
 	  		let output = "";
 	  		if(results[0].length > 0) {
