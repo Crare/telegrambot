@@ -274,11 +274,12 @@ parseJunat = function(responsedata, lahto, maaranpaa) {
         juna.maaranpaa.lahtoaikaero = juna.aikataulu[juna.aikataulu.length-1].differenceInMinutes;
       }
       junat.push(juna);
+
   }
 
   // sort by departing time.
   junat.sort(function(a, b) {
-    return a.target2LahtoAika.getTime() - b.target2LahtoAika.getTime();
+    return a.targetLahtoAika.getTime() - b.targetLahtoAika.getTime();
   });
 
   return junat;
