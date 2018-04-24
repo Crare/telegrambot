@@ -1,5 +1,5 @@
 # Telegrambot
-Telegrambot with daily messages and commands to get information, like train-timetable, weather, and news. It also enables making simple reminders. Also it supports voice messages in english language. Voice message is sent to Microsoft Watson voice-recoqnition API and it tries to detect what you said.
+Telegrambot with daily messages and commands to get information, like train-timetable, weather, and news. It also enables making simple reminders. Also it supports voice messages in english language. Voice message is sent to Microsoft Watson voice-recoqnition API and it tries to detect what you said. Now also supports ruuvi-tags bluetooth beacons to read temperature-, humidity- and pressure-data.
 
 example command can be found by typing in chat where the bot is running by /help
 
@@ -45,12 +45,22 @@ Watson speach recognition: https://www.ibm.com/watson/developer/
 
 Yle news: https://yle.fi/uutiset/rss
 
-## unused apis currently
+Ampparit TV data: http://classic.ampparit.com/tietoa/feeds
 
-and/or elisa viihde API: https://github.com/enyone/elisaviihde
+## unused apis currently
 
 there is also a test of foreca weather that is unused: http://apitest.foreca.net/
 
+## Frameworks used
+
+ruuvitag sensor for ruuvitags via python-shell: https://github.com/ttu/ruuvitag-sensor
+python-shell
+xml2json
+commander
+diskspace
+giphy
+telegraf
+watson-developer-cloud
 
 # Setting up
 * Set all api keys that are needed in the "settings_template.json".
@@ -89,26 +99,27 @@ add the id given by the bot to your settings.json to testChatId and if you wanna
   You could use forever.js for running node in the background.
   command example:
   
-    forever start bot_cronjob.js --cronjob --MorningMessage
+    forever start bot_cronjob.js --morning
     
   or test bot:
   
-    forever start bot_cronjob.js --test --MorningMessage
+    forever start bot_cronjob.js --test --morning
  # arguments
- Sends messages to production chat.
- 
-    --cronjob
-    
- Sends messages as test to testChat.
+ Sends messages as test to testChat, without it goes to production chat.
  
     --test
     
  Shows message tailored for specific time of day.
  
-    --morningMessage
-    --eveningMessage
-    --weekendMessage
+    --morning
+    --evening
+    --weekend
     
  Displays diskspace at /var/www/html/ used,total,free space.
  
     --diskspace
+    
+# Troubleshooting
+Some functions don't work:
+
+Check you have all the variables filled in settings.json
