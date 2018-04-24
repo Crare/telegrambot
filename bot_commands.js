@@ -532,7 +532,9 @@ bot.command(['/movies2', '/films2'], (ctx) => {
 bot.command(['/movies', '/films'], (ctx) => {
   console.log("get movies called");
   let chatId = ctx.update.message.chat.id;
-  movies.getMoviesOnTV( (output) => {
+  let useHtmlMarkdown = true;
+  let only_today = true;
+  movies.getMoviesOnTV(useHtmlMarkdown, only_today, (output) => {
     let extras = {parse_mode: 'Html'};
     bot.telegram.sendMessage(chatId, output, extras).then(function() {
       console.log("Movies message sent.");

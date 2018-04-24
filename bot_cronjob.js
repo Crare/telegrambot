@@ -37,6 +37,7 @@ const sunrise_sunset = require('./data_parsers/sunrise-sunset.js');
 const happenings = require('./data_parsers/happenings.js');
 const flagdays = require('./data_parsers/flagdays.js');
 const holidays = require('./data_parsers/holidays.js');
+const movies = require('./data_parsers/movies.js');
 
 // commands
 cmdargs
@@ -348,6 +349,7 @@ show_evening_message = (chatId) => {
     let weather = "";
     let train = "";
     let happening = "";
+    let movies_tonight = "";
 
     async.waterfall([
         function(callback) {
@@ -368,12 +370,21 @@ show_evening_message = (chatId) => {
                 callback();
             });
         },
+        function(callback) {
+          let useHtmlMarkdown = false;
+          let only_today = true;
+          movies.getMoviesOnTV(useHtmlMarkdown, only_today, (movies_) => {
+            movies_tonight = movies_;
+            callback();
+          })
+        }
         // function(callback) {
         // },
     ], function (err, result) {
 
         var output = "*Good afternoon!" + "*\r\n";
         output += weather + "\r\n";
+        //output += movies_tonight + "\r\n";
         output += train + "\r\n";
         output += news;
         var extras = {parse_mode: 'Markdown'};

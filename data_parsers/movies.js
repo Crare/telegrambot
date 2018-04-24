@@ -46,7 +46,7 @@ exports.getAmpparitMoviesOnTV = (callback) => {
 	});
 }
 
-exports.getMoviesOnTV = (callback) => { 
+exports.getMoviesOnTV = (useHtmlMarkdown, only_today, callback) => { 
 
 	"use strict";
 
@@ -69,10 +69,16 @@ exports.getMoviesOnTV = (callback) => {
 				//   	if (err) throw err;
 				//   	console.log('Saved!');
 				// });
-
-				let output = "<b>Movies coming up in TV:</b> \r\n";
+				let output = "";
+				if(useHtmlMarkdown) {
+					output = "<b>Movies coming up in TV:</b> \r\n";
+				} else {
+					// else use normal markdown
+					output = "*Movies coming up in TV:* \r\n";
+				}
 				output += "[dd.MM. HH:mm (year, rating, channel) name.]\r\n";
 
+				let today = new Date();
 				let tomorrowMessage = false;
 				let movies = data.today.movie;
 				let lastDate = new Date();
@@ -83,13 +89,22 @@ exports.getMoviesOnTV = (callback) => {
 					let hours = date.getHours() >= 10 ? date.getHours() : "0" + date.getHours();
 					let minutes = date.getMinutes() >= 10 ? date.getMinutes() : "0" + date.getMinutes();
 					let now = new Date();
-					if (date.getDate() != lastDate.getDate()){
-						//console.log("-");
-						lastDate = date;
-						output += "-\r\n";
+					if (only_today && date.getDate() == today.getDate()
+						|| !only_today
+						|| only_today && date.getDate() == today.getDate() + 1 && date.getHours() < 6) {
+						if (date.getDate() != lastDate.getDate()){
+							//console.log("-");
+							lastDate = date;
+							output += "-\r\n";
+						}
+						//console.log(day + "." + month + " " + hours + ":" + minutes + " (" + movies[i].broadcast.channel + ", " + movies[i].rating.value + ", " + movies[i].year + ") " +  movies[i].name);
+						output += day + "." + month + ". " + hours + ":" + minutes + " (" + movies[i].year + ", " + movies[i].rating.value + ", " + movies[i].broadcast.channel + ") ";
+						if(useHtmlMarkdown) {
+							output += "<b>" +  movies[i].name + "</b> <a href='" + movies[i].item +  "'>link</a>" + "\r\n";
+						} else {
+							output += "*" +  movies[i].name + "* [link](" + movies[i].item +  ")" + "\r\n";
+						}
 					}
-					//console.log(day + "." + month + " " + hours + ":" + minutes + " (" + movies[i].broadcast.channel + ", " + movies[i].rating.value + ", " + movies[i].year + ") " +  movies[i].name);
-					output += day + "." + month + ". " + hours + ":" + minutes + " (" + movies[i].year + ", " + movies[i].rating.value + ", " + movies[i].broadcast.channel + ") <b>" +  movies[i].name + "</b> [<a href='" + movies[i].item +  "'>link</a>]" + "\r\n";
 				}
 
 				callback(output);
