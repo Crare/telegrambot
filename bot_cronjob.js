@@ -2,22 +2,6 @@
 
 const async = require('async');
 
-/*async.waterfall([
-    function(callback) {
-        callback(null, 'one', 'two');
-    },
-    function(arg1, arg2, callback) {
-        callback(null, 'three');
-    },
-    function(arg1, callback) {
-        callback(null, 'done');
-    }
-], function (err, result) {
-    // result now equals 'done'
-    console.log(result);
-});
-*/
-
 /* 
 * This telegrambot is made by Juho. Hi! C: https://github.com/crare/telegrambot
 * parsers can be found in folder ./data_parsers
@@ -51,6 +35,8 @@ const news_parser = require('./data_parsers/news2.js');
 const giphy_handler = require('./data_parsers/giphy.js');
 const sunrise_sunset = require('./data_parsers/sunrise-sunset.js');
 const happenings = require('./data_parsers/happenings.js');
+const flagdays = require('./data_parsers/flagdays.js');
+const holidays = require('./data_parsers/holidays.js');
 
 // commands
 cmdargs
@@ -146,6 +132,8 @@ show_morning_message = (chatId) => {
     let news = "";
     let sunrise = "";
     let happening = "";
+    let flagday = "";
+    let holiday = "";
 
     async.waterfall([
         function(callback) {
@@ -177,6 +165,18 @@ show_morning_message = (chatId) => {
                 happening = happenings_string;
                 callback();
             });
+        },
+        function(callback) {
+          holidays.getHolidayToday((holiday_)=> {
+            holiday = holiday_;
+            callback();
+          });
+        },
+        function(callback) {
+          flagdays.getFlagdayToday((flagday_)=> {
+            flagday = flagday_;
+            callback();
+          });
         }
         // function(callback) {
         // },
@@ -197,6 +197,8 @@ show_morning_message = (chatId) => {
 
         let week_number = getWeekNumber();
         output += "*Today is " + getDayName(date.getDay()) + " " + date.getDate() + "." + (date.getMonth()+1) + "." + date.getFullYear() + ". Week "+ week_number + ".*\r\n";
+        output += flagday + "\r\n";
+        output += holiday + "\r\n";
         output += happening + "\r\n";
         output += weather + "\r\n";
         output += sunrise + "\r\n\r\n";
@@ -286,6 +288,8 @@ show_weekend_message = (chatId) => {
     let weather = "";
     let news = "";
     let happening = "";
+    let flagday = "";
+    let holiday = "";
 
     async.waterfall([
         function(callback) {
@@ -306,10 +310,24 @@ show_weekend_message = (chatId) => {
                 callback();
             });
         },
+        function(callback) {
+          holidays.getHolidayToday((holiday_)=> {
+            holiday = holiday_;
+            callback();
+          });
+        },
+        function(callback) {
+          flagdays.getFlagdayToday((flagday_)=> {
+            flagday = flagday_;
+            callback();
+          });
+        }
         // function(callback) {
         // },
     ], function (err, result) {
         var output = "*Have a nice weekend!" + "*\r\n";
+        output += flagday + "\r\n";
+        output += holiday + "\r\n";
         output += happening + "\r\n";
         output += weather + "\r\n";
         output += news;
