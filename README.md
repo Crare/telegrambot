@@ -54,13 +54,20 @@ there is also a test of foreca weather that is unused: http://apitest.foreca.net
 ## Frameworks used
 
 ruuvitag sensor for ruuvitags via python-shell: https://github.com/ttu/ruuvitag-sensor
-python-shell
-xml2json
-commander
-diskspace
-giphy
-telegraf
-watson-developer-cloud
+
+python-shell - for using python scripts
+
+xml2json - parsing xml to json
+
+commander - command arguments
+
+diskspace - getting diskspace from folder
+
+giphy - gif images framework
+
+telegraf - telegrambot framework
+
+watson-developer-cloud - watson for speach recognition
 
 # Setting up
 * Set all api keys that are needed in the "settings_template.json".
