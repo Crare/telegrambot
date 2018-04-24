@@ -384,7 +384,7 @@ show_evening_message = (chatId) => {
 
         var output = "*Good afternoon!" + "*\r\n";
         output += weather + "\r\n";
-        //output += movies_tonight + "\r\n";
+        output += movies_tonight + "\r\n";
         output += train + "\r\n";
         output += news;
         var extras = {parse_mode: 'Markdown'};

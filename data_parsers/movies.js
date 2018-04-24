@@ -76,7 +76,7 @@ exports.getMoviesOnTV = (useHtmlMarkdown, only_today, callback) => {
 					// else use normal markdown
 					output = "*Movies coming up in TV:* \r\n";
 				}
-				output += "[dd.MM. HH:mm (year, rating, channel) name.]\r\n";
+				//output += "[dd.MM. HH:mm (year, rating, channel) name.]\r\n";
 
 				let today = new Date();
 				let tomorrowMessage = false;
