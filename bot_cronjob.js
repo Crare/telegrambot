@@ -18,6 +18,7 @@ const async = require('async');
 * THIS CODE IS RUN IN CRONTAB. telegram commands are in bot_commands.js
 */
 
+
 const Telegraf = require('telegraf')
 
 // first load api keys and settings:
@@ -39,6 +40,26 @@ const flagdays = require('./data_parsers/flagdays.js');
 const holidays = require('./data_parsers/holidays.js');
 const movies = require('./data_parsers/movies.js');
 
+/*
+lat float
+lon float
+country string
+city string
+
+weather bool
+sunrise_sunset bool
+diskspace string
+trains bool
+  trains_from string
+  trains_to string
+  trains_amount int
+happenings bool
+holidays bool
+movies bool
+flags bool
+news bool
+*/
+
 // commands
 cmdargs
   .version('0.0.1')
@@ -48,17 +69,38 @@ cmdargs
   .option('--friday', 'Show friday message')
   .option('--weekend', 'Show weekend message')
   .option('--diskspace', 'Displays diskspace at /var/www/html/ used,total,free space.')
+
+// new commands for building daily message with command-parameters.
+  .option('--newCommands', 'Build a message with command parameters.')
+  .option('-w, --weather', 'Show weather forecast.')
+  .option('--lat <n>', 'Latitude coordinate for weather. (otherwise uses settings.lat)', parseFloat)
+  .option('--lon <n>', 'Longitude coordinate for weather. (otherwise uses settings.lon)', parseFloat)
+  .option('-s, --sunrise_sunset', 'Show sunrise and sunset time.')
+  .option('--diskspace [path]', 'Show diskspace at path.')
+  .option('-t, --trains', 'Show train schedules.')
+  .option('--trains_from [station_name]', 'Station for departing.')
+  .option('--trains_to [station_name]', 'Station for arrival.')
+  .option('--trains_amount <n>', 'Amount of train-schedules shown.', parseInt)
+  .option('-h, --happenings', 'Show happenings for today.')
+  .option('-H, --holidays', 'Show special holiday if today is holiday.')
+  .option('-m, --movies', 'Show todays movies.')
+  .option('-f, --flags', 'Show flagday information if today is flagday.')
+  .option('-n, --news', 'Show news for today.')
+
 .parse(process.argv);
 
 // setup bot
 let botToken = settings.prod_bot_key;
 let sendToChatId = settings.productionChatId;
 let botName = settings.botName;
+
 if(cmdargs.test) {
+  // use test bot
   botToken = settings.test_bot_key;
   sendToChatId = settings.testChatId;
   botName = settings.testBotName;
 }
+
 const bot = new Telegraf(botToken)
 
 // setup api keys
@@ -124,6 +166,24 @@ getWeekNumber = () => {
   return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
 }
 
+getEveningMessage = () => {
+  return "*Good afternoon!" + "*\r\n";
+}
+
+getRandomMorningGreeting = () => {
+  let rand_i = Math.floor(Math.random() * morning_greetings.length);
+  let output = morning_greetings[rand_i] + "\r\n";
+  return output;
+}
+
+getFridayEveningMessage = () => {
+  return "*IT'S FRIDAY YAY!" + "*\r\n";
+}
+
+getWeekendMessage = () => {
+  return "*Have a nice weekend!" + "*\r\n";
+}
+
 show_morning_message = (chatId) => {
     console.log("setting daily morning message.");
     let place = { nimi: settings.morning_weather_at, countrycode: settings.countrycode, lat: settings.sun_at_lat, lng: settings.sun_at_lon}
@@ -185,10 +245,7 @@ show_morning_message = (chatId) => {
 
         // get random morning message
         var output = "";
-        var rand_i = Math.floor(Math.random() * morning_greetings.length);
-        output += "" + morning_greetings[rand_i] + "\r\n";
-        console.log(morning_greetings[rand_i]);
-        console.log(rand_i);
+        output += getRandomMorningGreeting();
 
         var date = new Date();
         hours = date.getHours();
@@ -403,6 +460,22 @@ bytesToSize = (bytes) => {
    return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
 };
 
+getDiskSpaceMessage = (path, callback) => {
+  let output = "";
+  diskspace.check(path, (err, result) => { 
+    if(err) {
+      callback("Couldn't get diskspace at path: " + path);
+    } else {
+      output += "*Diskspace at* " + path + "\r\n";
+      output += "*Total:* " + bytesToSize(result.total) + " 100% \r\n";
+      output += "*Used:* " + bytesToSize(result.used) + " " + ((result.used/result.total) * 100).toFixed(2) + "% " + "\r\n";
+      output += "*Free:*  " + bytesToSize(result.free) + " " + ((result.free/result.total) * 100).toFixed(2) + "% " + "\r\n";
+      output += "*Status:* " + result.status + "\r\n";
+      callback(output);
+    }
+  });
+}
+
 getDiskSpace = (path, chatId) => {
   diskspace.check(path, (err, result) => { 
     let output = "*Hello this is diskspace information:*\r\n";
@@ -419,24 +492,209 @@ getDiskSpace = (path, chatId) => {
   });
 }
 
-// call message functions, depending on arguments
-if(cmdargs.morning) {
-  console.log("morning message");
-  show_morning_message(sendToChatId);
+buildMessageWithCommands = () => {
+  let output = "";
 
-} else if (cmdargs.evening) {
-  console.log("evening message");
-  show_evening_message(sendToChatId);
+  // first greeting message
+  if(cmdargs.morning) {
+    output += getRandomMorningGreeting();
+  } else if (cmdargs.evening) {
+    output += getEveningMessage();
+  } else if (cmdargs.fridayEvening) {
+    output += getFridayEveningMessage();
+  } else if (cmdargs.weekendMessage) {
+    output += getWeekendMessage();
+  }
 
-} else if (cmdargs.diskspace) {
-  console.log("diskspace");
-  getDiskSpace(diskspaceCheckLocation, sendToChatId);
+  // add wanted functions to waterfall for getting asyn function callbacks back to back syncronously.
+  // next if statements make up output message depending what commands are used as starting parameters.
+  let waterfall_functions = [];
 
-} else if (cmdargs.friday) {
-  console.log("FridayMessage");
-  show_friday_message(sendToChatId);
+  // setup place
+  let place = {
+    nimi: settings.morning_weather_at,
+    countrycode: settings.countrycode,
+    lat: settings.sun_at_lat,
+    lng: settings.sun_at_lon,
+    province: undefined
+  }
+  if(cmdargs.lon) {
+    place.lon = cmdargs.lon;
+  }
+  if(cmdargs.lat) {
+    place.lon = cmdargs.lat;
+  }
+  if(cmdargs.country) {
+    place.lon = cmdargs.country;
+  }
+  if(cmdargs.city) {
+    place.nimi = cmdargs.city;
+  }
 
-} else if (cmdargs.weekend) {
-  console.log("WeekendMessage");
-  show_weekend_message(sendToChatId);
+/*
+lat float
+lon float
+country string
+city string
+
+weather bool
+sunrise_sunset bool
+diskspace bool
+trains bool
+  trains_from string
+  trains_to string
+  trains_amount int
+happenings bool
+holidays bool
+movies bool
+flags bool
+news bool
+*/
+
+  if (cmdargs.weather) {
+    waterfall_functions.push(
+      function(callback) {
+        weather_parser.getOpenWeatherData(place, 3, (weather_forecast) => {
+            output += weather_forecast + "\r\n";
+            callback();
+        });
+      }
+    );
+  }
+
+  if (cmdargs.sunrise_sunset) {
+    waterfall_functions.push(
+      function(callback) {
+        sunrise_sunset.getSunDataAtLocation(place, (sun_data) => {
+          output += sun_data + "\r\n";
+          callback();
+        });
+      }
+    );
+  }
+
+  if (cmdargs.diskspace) {
+    waterfall_functions.push(
+      function(callback) {
+        getDiskSpaceMessage(path, (message) => {
+          output += message + "\r\n";
+        })
+      }
+    );
+  }
+
+  if (cmdargs.trains) {
+    let trains_from = cmdargs.trains_from;
+    let trains_to = cmdargs.trains_to;
+    let trains_amount = cmdargs.trains_amount;
+    let getCargoTrains = false;
+
+    if(trains_from != undefined && trains_to != undefined) {
+      waterfall_functions.push(
+        function(callback) {
+          train_parser.haeJunatReitille(trains_from, trains_to, trains_amount, getCargoTrains, (trains) => {
+            output += trains + "\r\n";
+            callback();
+          });
+        }
+      );
+    }
+  }
+
+  if (cmdargs.happenings) {
+    waterfall_functions.push(
+      function(callback) {
+        happenings.getHappeningsTodayString((happenings_string) => {
+          output += happenings_string + "\r\n";
+          callback();
+        });
+      }
+    );
+  }
+
+  if (cmdargs.holidays) {
+    waterfall_functions.push(
+      function(callback) {
+        holidays.getHolidayToday((holiday)=> {
+          output += holiday + "\r\n";
+          callback();
+        });
+      }
+    );
+  }
+
+  if (cmdargs.movies) {
+    waterfall_functions.push(
+      function(callback) {
+        let useHtmlMarkdown = false;
+        let only_today = true;
+        movies.getMoviesOnTV(useHtmlMarkdown, only_today, (moviesMessage) => {
+          output += moviesMessage + "\r\n";
+          callback();
+        })
+      }
+    );
+  }
+
+  if (cmdargs.flags) {
+    waterfall_functions.push(
+      function(callback) {
+        flagdays.getFlagdayToday((flagday_)=> {
+          output += flagday_ + "\r\n";
+          callback();
+        });
+      }
+    );
+  }
+
+  if (cmdargs.news) {
+    waterfall_functions.push(
+      function(callback) {
+        news_parser.getYleNews(place.province, defaultLang, 5, (news_) => {
+          output += news_;
+          callback();
+        });
+      }
+    );
+  }
+
+  // run waterfall functions and return output message to chat.
+  async.waterfall(waterfall_functions, function (err, result) {
+    console.log("waterfall result = " + result);
+    console.log(output);
+
+    var extras = {parse_mode: 'Markdown'};
+    bot.telegram.sendMessage(chatId, sendToChatId, extras).then(() => {
+      console.log("Send buildMessageWithCommands message.");
+    });
+  });
+
+};
+
+// new command method for building message with multiple commands.
+if (cmdargs.newCommands) {
+  console.log("building Message With Commands");
+  buildMessageWithCommands();
+} else {
+  // call message functions, depending on arguments
+  if(cmdargs.morning) {
+    console.log("morning message");
+    show_morning_message(sendToChatId);
+
+  } else if (cmdargs.evening) {
+    console.log("evening message");
+    show_evening_message(sendToChatId);
+
+  } else if (cmdargs.diskspace) {
+    console.log("diskspace");
+    getDiskSpace(diskspaceCheckLocation, sendToChatId);
+
+  } else if (cmdargs.friday) {
+    console.log("FridayMessage");
+    show_friday_message(sendToChatId);
+
+  } else if (cmdargs.weekend) {
+    console.log("WeekendMessage");
+    show_weekend_message(sendToChatId);
+  }
 }
