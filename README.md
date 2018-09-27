@@ -96,21 +96,51 @@ then send message to chat with the bot:
 add the id given by the bot to your settings.json to testChatId and if you wanna use same for production then there too.
 
 ## run bot by:
+  running locally from console:
+
     node bot_commands.js
   
   or test bot by:
   
     node bot_commands.js --test
+    
+  running node script in background with forever.js:
+  
+    forever start bot_commands.js 
+    
+  stopping bot
+  
+    forever stop bot_commands.js
+    
+  listing of running forever-scipts:
+  
+    forever list
 
 ## cronjob for daily messages:
-  You could use forever.js for running node in the background.
-  command example:
+  You need to run bot_cronjob.js from crontab.
   
-    forever start bot_cronjob.js --morning
+  Example: open crontab in console
+    
+    crontab -e
+    
+  and add morning message for monday (# m h  dom mon dow   command)
+  dow = day of the week starts from sunday.
+  
+    00 7 * * 1 cd ~/git/telegrambot/ && node bot_cronjob.js --morning
+  
+  
+  testing bot_cronjob messages.
+  
+    node bot_cronjob.js --morning
     
   or test bot:
   
-    forever start bot_cronjob.js --test --morning
+    node bot_cronjob.js --test --morning
+    node bot_cronjob.js --test --evening
+    node bot_cronjob.js --test --friday
+    node bot_cronjob.js --test --weekend
+    node bot_cronjob.js --test --diskspace
+    
  # arguments
  Sends messages as test to testChat, without it goes to production chat.
  
