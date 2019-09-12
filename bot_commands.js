@@ -1,5 +1,6 @@
 /*
-* juhis_bot.js made by Juho. Hi! C: https://github.com/crare/telegrambot
+* bot for running commands
+* This telegrambot is made by Crare. Hi! C: https://github.com/crare/telegrambot
 * parsers can be found in folder ./data_parsers
 * train-data from https://rata.digitraffic.fi/api/v1/doc/index.html
 * weather-data from https://openweathermap.org/api
