@@ -98,19 +98,19 @@ add the id given by the bot to your settings.json to testChatId and if you wanna
 ## run bot by:
   running locally from console:
 
-    node bot_commands.js
+    npm start
   
   or test bot by:
   
-    node bot_commands.js --test
+    node run testbot
     
   running node script in background with forever.js:
   
-    forever start bot_commands.js 
+    npm run foreverbot
     
   stopping bot
   
-    forever stop bot_commands.js
+    npm run stopbot
     
   listing of running forever-scipts:
   

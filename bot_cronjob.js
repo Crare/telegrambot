@@ -22,8 +22,8 @@ const Telegraf = require('telegraf')
 // first load api keys and settings:
 // save your settings in 'settings_template.json'
 // and change the name it as 'settings.json'.
-const fs = require('fs'); // used for saving error logs in /tmp
-settings = JSON.parse(fs.readFileSync('./settings.json'));
+const settings = require('./settings.json');
+morning_greetings = require('./data/morning_greetings.json');
 
 let cmdargs = require('commander');
 var diskspace = require('diskspace');
@@ -78,8 +78,6 @@ let diskspaceCheckLocation = "/var/www/html/";
 
 // Default language for news if not given. Possible languages are: en, fi, ru, sa, simplefi
 let defaultLang = "en";
-
-let morning_greetings = settings.morning_greetings;
 
 getDayName = (index) => {
   // quick handling of day names, could be made otherway but this was fast to do.

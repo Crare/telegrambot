@@ -4,6 +4,10 @@
   "description": "Telegrambot that tells weather, news, train schedules etc.",
   "main": "bot_commands.js",
   "scripts": {
+    "start": "node bot_commands.js",
+    "testbot": "node bot_commands.js --test",
+    "foreverbot": "forever start bot_commands.js",
+    "stopbot": "forever stop bot_commands.js",
     "test": "mocha"
   },
   "repository": {

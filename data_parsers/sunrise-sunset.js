@@ -22,7 +22,7 @@ exports.getSunDataAtLocation = (place, callBack) => {
 	            var sunset = new Date(data.results.sunset);
 	            var day_length_in_hours = ((data.results.day_length * 1000) / 3.6e+6); // return is secons some reason. convert it to ms and then to human-readable. (divide by 3.6e+6 == 1h in ms)
 
-	            var output = ""; // = place.nimi + " " + place.countrycode + ":\r\n";
+	            var output = "<b>Dusk till dawn at "+place.name+":</b> \r\n"
 	            output += emoji_sun + "Sunrise at " + sunrise.getHours() + ":" + sunrise.getMinutes() + "\r\n";
 	            output += emoji_moon + "Sunset at " + sunset.getHours() + ":" + sunset.getMinutes() + "\r\n";
 	            output += "Day length is " + day_length_in_hours.toFixed(2) + " hours.";

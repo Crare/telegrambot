@@ -11,15 +11,13 @@
 // first load api keys and settings:
 // save your api keys in 'settings_template.json'
 // and change the name to 'settings.json'.
-const fs = require('fs')
-settings = JSON.parse(fs.readFileSync('./settings.json'));
+const settings = require('./settings.json');
 
 // get required modules.
 const Telegraf = require('telegraf');
 let cmdargs = require('commander');
 const diskspace = require('diskspace');
 let diskspace_path = "/var/www/html/";
-//const fs = require('fs'); // used for saving error logs in /tmp
 
 const train_parser = require('./data_parsers/vr-trains.js');
 const weather_parser = require('./data_parsers/weather.js');
@@ -69,6 +67,8 @@ if(cmdargs.test) {
 //emojis
 var e_train   = '\u{1f686}';
 var e_train2   = '\u{1F682}';
+
+const extras_ = {parse_mode: 'Html'};
 
 // milliseconds to more human readable format
 msToHumanReadable = (ms) => {
@@ -121,8 +121,7 @@ bot.command(['/h', '/help', '/help@'+botName], (ctx) => {
   output += "More information can be found by writing command without parameters after it.\r\n";
 
   var chatId = ctx.update.message.chat.id;
-  var extras = {parse_mode: 'Html'};
-  bot.telegram.sendMessage(chatId, output, extras).then(function() {
+  bot.telegram.sendMessage(chatId, output, extras_).then(function() {
     console.log("Message sent.");
   })
 })
@@ -143,13 +142,10 @@ bot.command(['/uptime', '/up'], (ctx) => {
 // SUN
 bot.command(['/sunrise', '/sunset', '/dusk', '/dawn', '/sun'], (ctx)=> {
   console.log("sun command called");
-  place = { nimi: "Lahti", countrycode: "FI", lat: 60.9827, lng: 25.6612};
+  place = { name: settings.sun_place_name, countrycode: settings.countrycode, lat: settings.sun_at_lat, lng: settings.sun_at_lon};
   sunrise_sunset.getSunDataAtLocation(place, function(sun_data) {
-    var output = "<b>Dusk till dawn at Lahti, Finland:</b> \r\n";
-        output += sun_data;
     var chatId = ctx.update.message.chat.id;
-    var extras = {parse_mode: 'Html'};
-    bot.telegram.sendMessage(chatId, output, extras).then(function() {
+    bot.telegram.sendMessage(chatId, sun_data, extras_).then(function() {
       console.log("Message sent.");
     })
   });
@@ -305,7 +301,6 @@ bot.command(['/f', '/flip', '/flipcoin', '/heads', '/tails'], (ctx) => {
 bot.command(['/test'], (ctx)=> {
   console.log("test command called");
   var chatId = ctx.update.message.chat.id;
-  var extras = {parse_mode: 'HTML'};
   var output = '<b>bold</b>, <strong>bold</strong>\r\n';
   output += '<i>italic</i>, <em>italic</em>\r\n';
   output += '<a href="http://www.example.com/">inline URL</a>\r\n';
@@ -313,7 +308,7 @@ bot.command(['/test'], (ctx)=> {
   output += '<code>inline fixed-width code</code>\r\n';
   output += '<pre>pre-formatted fixed-width code block</pre>\r\n';
 
-  bot.telegram.sendMessage(chatId, output, extras).then(function() {
+  bot.telegram.sendMessage(chatId, output, extras_).then(function() {
     console.log("Message sent.");
   })
 })
@@ -419,7 +414,7 @@ reminder.loadRemindersJSON(reminders_store_path, (reminders_array) => {
 
       var chatId = "258407019"; // send Juho a message for debugging
       var output = "<b>" + reminders.length + " reminders running active.</b>";
-      bot.telegram.sendMessage(chatId, start_message, extras).then(function() {
+      bot.telegram.sendMessage(chatId, start_message, extras_).then(function() {
         console.log("Message sent.");
       })
     });
@@ -438,7 +433,6 @@ bot.command(['/remind', '/re'], (ctx) => {
     username = ctx.message.from.first_name;
   }
   let unparsed_text = ctx.update.message.text;
-  let extras = {parse_mode: 'HTML'};
 
   try {
     reminder.createNewReminder(chatId, user_id, username, unparsed_text, function(reminder_obj) {
@@ -455,7 +449,7 @@ bot.command(['/remind', '/re'], (ctx) => {
         }
       });
     }, function(err) {
-      bot.telegram.sendMessage(chatId, err, extras).then(function() {
+      bot.telegram.sendMessage(chatId, err, extras_).then(function() {
           console.log("Error message sent.");
         })
     });
@@ -475,8 +469,7 @@ bot.command(['/reminders', '/res'], (ctx) => {
   } else {
     output += reminders.length + " reminders active.";
   }
-  let extras = {parse_mode: 'HTML'};
-  bot.telegram.sendMessage(chatId, output, extras).then(function() {
+  bot.telegram.sendMessage(chatId, output, extras_).then(function() {
     console.log("Message sent.");
   })
 });
@@ -522,8 +515,7 @@ bot.command(['/movies2', '/films2'], (ctx) => {
   console.log("get movies2 called");
   let chatId = ctx.update.message.chat.id;
   movies.getAmpparitMoviesOnTV( (output) => {
-    let extras = {parse_mode: 'Html'};
-    bot.telegram.sendMessage(chatId, output, extras).then(function() {
+    bot.telegram.sendMessage(chatId, output, extras_).then(function() {
       console.log("Movies message sent.");
     })
   })
@@ -536,8 +528,7 @@ bot.command(['/movies', '/films'], (ctx) => {
   let useHtmlMarkdown = true;
   let only_today = false;
   movies.getMoviesOnTV(useHtmlMarkdown, only_today, (output) => {
-    let extras = {parse_mode: 'Html'};
-    bot.telegram.sendMessage(chatId, output, extras).then(function() {
+    bot.telegram.sendMessage(chatId, output, extras_).then(function() {
       console.log("Movies message sent.");
     })
   })
@@ -573,8 +564,7 @@ bot.command(['/tag','/ruuvi' ,'/ruuvitag'], (ctx)=> {
   let chatId = ctx.update.message.chat.id;
   ruuvi.getRuuviTagData(tag, (output) => {
     console.log(output);
-    let extras = {parse_mode: 'Html'};
-    bot.telegram.sendMessage(chatId, output, extras).then(function() {
+    bot.telegram.sendMessage(chatId, output, extras_).then(function() {
       console.log("Movies message sent.");
     })
   })
@@ -594,8 +584,7 @@ console.log("bot running!");
 bot.startPolling()
 
 // send message chat that the bot is running.
-var extras = {parse_mode: 'Html'};
 var start_message = "bot started running!";
-bot.telegram.sendMessage(sendToChatId, start_message, extras).then(function() {
+bot.telegram.sendMessage(sendToChatId, start_message, extras_).then(function() {
   console.log("Message sent.");
 })
