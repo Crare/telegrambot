@@ -29,9 +29,9 @@
     "commander": "^2.18.0",
     "diskspace": "^2.0.0",
     "giphy-js-sdk-core": "^1.0.5",
+    "ibm-watson": "^4.4.0",
     "python-shell": "^0.5.0",
     "telegraf": "^3.24.0",
-    "watson-developer-cloud": "^3.11.0",
     "xml2json": "^0.11.2"
   },
   "devDependencies": {

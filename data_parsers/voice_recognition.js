@@ -10,7 +10,7 @@
 const fs = require('fs')
 const Telegraf = require('telegraf')
 const https = require('https');
-const SpeechToTextV1 = require('watson-developer-cloud/speech-to-text/v1');
+const SpeechToTextV1 = require('ibm-watson/speech-to-text/v1');
 
 const settings = require('../settings.json');
 speech_to_text = new SpeechToTextV1({
