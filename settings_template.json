@@ -1,14 +1,17 @@
 {
     "botName": "",
     "testBotName": "",
+    
     "test_bot_key": "",
     "prod_bot_key": "",
     "openweathermap": "",
     "giphy": "",
     "watson_username": "",
     "watson_password": "",
+
     "testChatId": "",
     "productionChatId": "",
+
     "morning_trains_from": "Lahti", 
     "morning_trains_to": "Pasila", 
     "evening_trains_from": "Pasila", 
@@ -20,6 +23,7 @@
     "sun_at_lat": 60.1699,
     "sun_at_lon": 24.9384,
     "countrycode": "FI",
+
     "ruuvitag": "",
     "ruuvitag_name": "Home"
 }
