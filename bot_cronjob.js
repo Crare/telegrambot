@@ -64,14 +64,14 @@ news bool
 cmdargs
   .version('0.0.1')
   .option('--test', 'send messages to test bot instead of production bot.')
-  .option('--morning', 'Show morning message')
-  .option('--evening', 'Show evening message')
-  .option('--friday', 'Show friday message')
-  .option('--weekend', 'Show weekend message')
-  .option('--diskspace', 'Displays diskspace at /var/www/html/ used,total,free space.')
+  .option('-M, --morning', 'Show morning message')
+  .option('-e, --evening', 'Show evening message')
+  .option('-F, --friday', 'Show friday message')
+  .option('-W, --weekend', 'Show weekend message')
+  .option('-d, --diskspace', 'Displays diskspace at /var/www/html/ used,total,free space.')
 
   // new commands for building daily message with command-parameters.
-  .option('--newCommands', 'Build a message with command parameters.')
+  .option('-n, --newCommands', 'Build a message with command parameters.')
   .option('-w, --weather', 'Show weather forecast.')
   .option('--lat <n>', 'Latitude coordinate for weather. (otherwise uses settings.lat)', parseFloat)
   .option('--lon <n>', 'Longitude coordinate for weather. (otherwise uses settings.lon)', parseFloat)
@@ -85,7 +85,7 @@ cmdargs
   .option('-H, --holidays', 'Show special holiday if today is holiday.')
   .option('-m, --movies', 'Show todays movies.')
   .option('-f, --flags', 'Show flagday information if today is flagday.')
-  .option('-n, --news', 'Show news for today.')
+  .option('-N, --news', 'Show news for today.')
   .option('-l, --l_week', 'Show lunch menu for this week.')
   .option('-l, --l_today', 'Show lunch menu for today.')
 
@@ -95,10 +95,6 @@ cmdargs
 let botToken = settings.prod_bot_key;
 let sendToChatId = settings.productionChatId;
 let botName = settings.botName;
-
-// setup bot
-const botToken = settings.prod_bot_key;
-const sendToChatId = settings.productionChatId;
 
 const debug = cmdargs.debug ? true : false;
 
@@ -117,10 +113,6 @@ debugLog = (output) => {
 }
 
 const extras = { parse_mode: 'Markdown' };
-
-// setup api keys
-weather_parser.setApiKey(settings.openweathermap);
-giphy_handler.setApiKey(settings.giphy);
 
 const diskspaceCheckLocation = "/var/www/html/";
 
@@ -650,7 +642,7 @@ buildMessageWithCommands = () => {
     debugLog("waterfall result = " + result);
     debugLog(output);
 
-    bot.telegram.sendMessage(chatId, sendToChatId, extras).then(() => {
+    bot.telegram.sendMessage(sendToChatId, output, extras).then(() => {
       debugLog("Send buildMessageWithCommands message.");
     });
   });
