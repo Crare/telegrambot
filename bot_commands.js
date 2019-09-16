@@ -23,7 +23,7 @@ const diskspace_path = "/var/www/html/";
 const train_parser = require('./data_parsers/vr-trains.js');
 const weather_parser = require('./data_parsers/weather.js');
 const news_parser = require('./data_parsers/news3.js');
-const voice_recognition = require('./data_parsers/voice_recognition.js');
+// const voice_recognition = require('./data_parsers/voice_recognition.js');
 const giphy_handler = require('./data_parsers/giphy.js');
 const reminder = require('./data_parsers/reminder.js');
 const sunrise_sunset = require('./data_parsers/sunrise-sunset.js');
@@ -315,31 +315,31 @@ bot.command(['/test'], (ctx) => {
 })
 
 // VOICE MESSAGE, telegram bot sees voice-message in chat
-bot.on('voice', (ctx) => {
-  debugLog("voice message found");
-  let username = ctx.message.from.username;
-  debugLog("Got voice message from @" + username);
-  debugLog("Loading the audio file...");
+// bot.on('voice', (ctx) => {
+//   debugLog("voice message found");
+//   let username = ctx.message.from.username;
+//   debugLog("Got voice message from @" + username);
+//   debugLog("Loading the audio file...");
 
-  voice_recognition.getFile(ctx.message.voice.file_id, (localpath) => {
+//   voice_recognition.getFile(ctx.message.voice.file_id, (localpath) => {
 
-    debugLog("File loaded. sending the audio to Watson...");
-    debugLog("localpath: " + localpath);
-    voice_recognition.speechToText(localpath, (result) => {
+//     debugLog("File loaded. sending the audio to Watson...");
+//     debugLog("localpath: " + localpath);
+//     voice_recognition.speechToText(localpath, (result) => {
 
-      debugLog("Watson found keywords: ");
-      debugLog(result.keywords);
-      debugLog("Watson returned the message:");
-      debugLog(result.text + "\n");
+//       debugLog("Watson found keywords: ");
+//       debugLog(result.keywords);
+//       debugLog("Watson returned the message:");
+//       debugLog(result.text + "\n");
 
-      if (result.text != undefined) {
-        ctx.reply("Watson thinks @" + username + " said: " + result.text);
-      } else {
-        ctx.reply("Couldn't get Watson results, please try again.");
-      }
-    });
-  });
-});
+//       if (result.text != undefined) {
+//         ctx.reply("Watson thinks @" + username + " said: " + result.text);
+//       } else {
+//         ctx.reply("Couldn't get Watson results, please try again.");
+//       }
+//     });
+//   });
+// });
 
 // get gifs
 bot.command(['/gif'], (ctx) => {

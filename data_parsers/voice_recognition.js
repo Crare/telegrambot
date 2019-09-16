@@ -13,14 +13,13 @@ const https = require('https');
 const SpeechToTextV1 = require('ibm-watson/speech-to-text/v1');
 
 const settings = require('../settings.json');
+const botToken = settings.test_bot_key; // or use settings.prod_bot_key
 speech_to_text = new SpeechToTextV1({
   username: settings.watson_username,
   password: settings.watson_password
 });
-botToken = settings.test_bot_key; // or use settings.prod_bot_key
 
-const { Markup } = Telegraf
-let botToken;
+const { Markup } = Telegraf;
 let speech_to_text = undefined;
 
 downloadFile = (url, dest, cb) => {
