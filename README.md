@@ -1,4 +1,5 @@
 # Telegrambot
+
 Telegrambot with daily messages and commands to get information, like train-timetable, weather, and news. It also enables making simple reminders. Also it supports voice messages in english language. Voice message is sent to Microsoft Watson voice-recoqnition API and it tries to detect what you said. Now also supports ruuvi-tags bluetooth beacons to read temperature-, humidity- and pressure-data.
 
 example command can be found by typing in chat where the bot is running by /help
@@ -29,6 +30,7 @@ random gif or semi-random with tag.
 ![alt tag](https://github.com/Crare/telegrambot/blob/master/example_images/snip7.PNG)
 
 # api sources
+
 Telegrambot API: https://core.telegram.org/bots/api
 
 Telegraf.js API: http://telegraf.js.org/#/
@@ -70,11 +72,13 @@ telegraf - telegrambot framework
 watson-developer-cloud - watson for speach recognition
 
 # Setting up
-* Set all api keys that are needed in the "settings_template.json".
-* Add also your bot token keys for testing bot and production, can be same if you don't mind same bot being in production.
-* Rename "settings_template".json as "settings.json".
+
+- Set all api keys that are needed in the "settings_template.json".
+- Add also your bot token keys for testing bot and production, can be same if you don't mind same bot being in production.
+- Rename "settings_template".json as "settings.json".
 
 ## getting api keys
+
 watson for speach recognition, you need api username and password for this.
 https://www.ibm.com/watson/developer/
 
@@ -85,78 +89,84 @@ giphy api for gifs
 https://developers.giphy.com/
 
 ## install required packages
+
 in main folder of the telegrambot run in terminal:
 
     npm install
-    
+
 ## get chatId by running test_bot.js
+
     node test_bot.js
+
 then send message to chat with the bot:
-    /chatId
+/chatId
 add the id given by the bot to your settings.json to testChatId and if you wanna use same for production then there too.
 
 ## run bot by:
-  running locally from console:
+
+running locally from console:
 
     npm start
-  
-  or test bot by:
-  
+
+or test bot by:
+
     node run testbot
-    
-  running node script in background with forever.js:
-  
+
+running node script in background with forever.js:
+
     npm run foreverbot
-    
-  stopping bot
-  
+
+stopping bot
+
     npm run stopbot
-    
-  listing of running forever-scipts:
-  
+
+listing of running forever-scipts:
+
     forever list
 
 ## cronjob for daily messages:
-  You need to run bot_cronjob.js from crontab.
+
+You need to run bot_cronjob.js from crontab.
+
+Example: open crontab in console
   
-  Example: open crontab in console
-    
-    crontab -e
-    
-  and add morning message for monday (# m h  dom mon dow   command)
-  dow = day of the week starts from sunday.
+ crontab -e
   
+ and add morning message for monday (# m h dom mon dow command)
+dow = day of the week starts from sunday.
+
     00 7 * * 1 cd ~/git/telegrambot/ && node bot_cronjob.js --morning
-  
-  
-  testing bot_cronjob messages.
-  
+
+testing bot_cronjob messages.
+
     node bot_cronjob.js --morning
-    
-  or test bot:
-  
+
+or test bot:
+
     node bot_cronjob.js --test --morning
     node bot_cronjob.js --test --evening
     node bot_cronjob.js --test --friday
     node bot_cronjob.js --test --weekend
     node bot_cronjob.js --test --diskspace
-    
- # arguments
- Sends messages as test to testChat, without it goes to production chat.
- 
+
+# arguments
+
+Sends messages as test to testChat, without it goes to production chat.
+
     --test
-    
- Shows message tailored for specific time of day.
- 
+
+Shows message tailored for specific time of day.
+
     --morning
     --evening
     --weekend
-    
- Displays diskspace at /var/www/html/ used,total,free space.
- 
+
+Displays diskspace at /var/www/html/ used,total,free space.
+
     --diskspace
-    
+
 # Troubleshooting
+
 Some functions don't work:
 
 Check you have all the variables filled in settings.json

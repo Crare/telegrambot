@@ -1,29 +1,29 @@
 {
-    "botName": "",
-    "testBotName": "",
-    
-    "test_bot_key": "",
-    "prod_bot_key": "",
-    "openweathermap": "",
-    "giphy": "",
-    "watson_username": "",
-    "watson_password": "",
+  "botName": "",
+  "testBotName": "",
 
-    "testChatId": "",
-    "productionChatId": "",
+  "test_bot_key": "",
+  "prod_bot_key": "",
+  "openweathermap": "",
+  "giphy": "",
+  "watson_username": "",
+  "watson_password": "",
 
-    "morning_trains_from": "Lahti", 
-    "morning_trains_to": "Pasila", 
-    "evening_trains_from": "Pasila", 
-    "evening_trains_to": "Lahti", 
-    "morning_weather_at": "Helsinki",
-    "evening_weather_at": "Helsinki",
-    "weekend_weather_at": "Helsinki",
-    "sun_place_name": "Helsinki",
-    "sun_at_lat": 60.1699,
-    "sun_at_lon": 24.9384,
-    "countrycode": "FI",
+  "testChatId": "",
+  "productionChatId": "",
 
-    "ruuvitag": "",
-    "ruuvitag_name": "Home"
+  "morning_trains_from": "Lahti",
+  "morning_trains_to": "Pasila",
+  "evening_trains_from": "Pasila",
+  "evening_trains_to": "Lahti",
+  "morning_weather_at": "Helsinki",
+  "evening_weather_at": "Helsinki",
+  "weekend_weather_at": "Helsinki",
+  "sun_place_name": "Helsinki",
+  "sun_at_lat": 60.1699,
+  "sun_at_lon": 24.9384,
+  "countrycode": "FI",
+
+  "ruuvitag": "",
+  "ruuvitag_name": "Home"
 }

@@ -10,140 +10,104 @@ exports.setApiKey = (api_key) => {
   openweathermapAPI = api_key;
 }
 
+/*  preserve:start */
 //Openweathermap Weather codes and corressponding emojis
-var thunderstorm  = '\u{1F4A8}' // Code: 200's, 900, 901, 902, 905
-var drizzle       = '\u{1F4A7}' // Code: 300's
-var rain          = '\u{02614}' // Code: 500's
-var snowflake     = '\u{02744}' // Code: 600's snowflake
-var snowman       = '\u{026C4}' // Code: 600's snowman, 903, 906
-var atmosphere    = '\u{1F301}' // Code: 700's foogy
-var clearSky      = '\u{02600}' // Code: 800 clear sky
-var fewClouds     = '\u{026C5}' // Code: 801 sun behind clouds
-var clouds        = '\u{02601}' // Code: 802-803-804 clouds general
-var hot           = '\u{1F525}' // Code: 904
-var defaultEmoji  = '\u{1F300}' // default emojis
+const thunderstorm = '\u{1F4A8}' // Code: 200's, 900, 901, 902, 905
+const drizzle = '\u{1F4A7}' // Code: 300's
+const rain = '\u{02614}' // Code: 500's
+const snowflake = '\u{02744}' // Code: 600's snowflake
+const snowman = '\u{026C4}' // Code: 600's snowman, 903, 906
+const atmosphere = '\u{1F301}' // Code: 700's foogy
+const clearSky = '\u{02600}' // Code: 800 clear sky
+const fewClouds = '\u{026C5}' // Code: 801 sun behind clouds
+const clouds = '\u{02601}' // Code: 802-803-804 clouds general
+const hot = '\u{1F525}' // Code: 904
+const defaultEmoji = '\u{1F300}' // default emojis
+/* beautify preserve:end */
 
-function getEmoji(code) {
-  var emoji = "";
-  //console.log(code);
+getEmoji = (code) => {
   switch (code) {
     case 200:
     case 900:
     case 901:
     case 902:
     case 905:
-      emoji = thunderstorm;
-      break;
+      return thunderstorm;
     case 300:
-      emoji = drizzle;
-      break;
+      return drizzle;
     case 500:
-      emoji = rain;
-      break;
+      return rain;
     case 600:
-      emoji = snowflake;
-      break;
+      return snowflake;
     case 903:
     case 906:
-      emoji = snowman;
-      break;
+      return snowman;
     case 700:
-      emoji = atmosphere;
-      break;
+      return atmosphere;
     case 800:
-      emoji = clearSky;
-      break;
+      return clearSky;
     case 801:
-      emoji = fewClouds;
-      break;
+      return fewClouds;
     case 802:
     case 803:
     case 804:
-      emoji = clouds;
-      break;
+      return clouds;
     case 904:
-      emoji = hot;
-      break;
+      return hot;
     default:
-      emoji = defaultEmoji;
-      break;
-  }
-  return emoji;
-}
-
-function getDayName(index) {
-  switch (index) {
-    case 0:
-      return "Sun";
-      break;
-    case 1:
-      return "Mon";
-      break;
-    case 2:
-      return "Tue";
-      break;
-    case 3:
-      return "Wed";
-      break;
-    case 4:
-      return "Thu";
-      break;
-    case 5:
-      return "Fri";
-      break;
-    case 6:
-      return "Sat";
-      break;
-    default:
-      return "Unknown day index";
-      break;
+      return defaultEmoji;
   }
 }
 
-function tulostaOpenweatherData(data) {
-  var output = "*Here's ";
-  if(data.dayAmount > 1) { output += data.dayAmount + "-day weather-forecast for " + data.city.name + ": \r\n\r\n";}
-  else {output += "today's weather-forecast for " + data.city.name + ": \r\n\r\n";}
+const daynames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+getDayName = (index) => {
+  return daynames[index];
+}
+
+tulostaOpenweatherData = (data) => {
+  let output = "*Here's ";
+  if (data.dayAmount > 1) { output += data.dayAmount + "-day weather-forecast for " + data.city.name + ": \r\n\r\n"; }
+  else { output += "today's weather-forecast for " + data.city.name + ": \r\n\r\n"; }
   output += "*";
   last_date = undefined;
   days = 1;
-  for(i = 0; i < data.list.length; i++) {
+  for (i = 0; i < data.list.length; i++) {
     date = new Date(data.list[i].dt_txt);
-    if(last_date == undefined) {
+    if (last_date == undefined) {
       last_date = date;
-      output += "*" + getDayName(date.getDay()) + " " + date.getDate() + "." + (date.getMonth()+1) + ".*\r\n";
+      output += "*" + getDayName(date.getDay()) + " " + date.getDate() + "." + (date.getMonth() + 1) + ".*\r\n";
     }
-    if(last_date.getDate() != date.getDate()) {
-      if(data.dayAmount == days) {return output;}
+    if (last_date.getDate() != date.getDate()) {
+      if (data.dayAmount == days) { return output; }
       days++;
       output += "\r\n";
-      output += "*" + getDayName(date.getDay()) + " " + date.getDate() + "." + (date.getMonth()+1) + ".*\r\n";
+      output += "*" + getDayName(date.getDay()) + " " + date.getDate() + "." + (date.getMonth() + 1) + ".*\r\n";
     }
     output += "[";
-    if(date.getHours() < 10) {output += "0"}
+    if (date.getHours() < 10) { output += "0" }
     output += date.getHours();
     output += "] ";
 
     output += parseInt(data.list[i].main.temp) + "°C ";
-    for(j = 0; j < data.list[i].weather.length; j++) {
+    for (j = 0; j < data.list[i].weather.length; j++) {
       output += getEmoji(data.list[i].weather[j].id) + " ";
     }
     output += parseInt(data.list[i].wind.speed) + "m/s "// + parseInt(data.list[i].wind.deg) + "° ";
     // output += parseInt(data.list[i].main.pressure) + "hPa ";
     // output += "h: " + parseInt(data.list[i].main.humidity) + "% ";
     // output += "c: " + parseInt(data.list[i].clouds.all) + "% ";
-    for(j = 0; j < data.list[i].weather.length; j++) {
+    for (j = 0; j < data.list[i].weather.length; j++) {
       output += data.list[i].weather[j].main + " ";
     }
     // if(data.list[i].rain) {
     //   console.log("rain: ");
     //   console.log(data.list[i].rain);
     // }
-    if(data.list[i].rain && parseInt(data.list[i].rain['3h']) >= 1) {output += parseInt(data.list[i].rain['3h']) + "mm ";}
-    else if(data.list[i].rain && data.list[i].rain['3h'] > 0) {output += "<1mm ";}
-    
+    if (data.list[i].rain && parseInt(data.list[i].rain['3h']) >= 1) { output += parseInt(data.list[i].rain['3h']) + "mm "; }
+    else if (data.list[i].rain && data.list[i].rain['3h'] > 0) { output += "<1mm "; }
+
     output += "\r\n";
-    if(last_date.getDate() != date.getDate()) {
+    if (last_date.getDate() != date.getDate()) {
       last_date = date;
     }
   }
@@ -171,22 +135,22 @@ function tulostaOpenweatherData(data) {
 }
 
 exports.getOpenWeatherData = (place, days, callBack, errorCallBack) => {
-  if(openweathermapAPI == "") {
+  if (openweathermapAPI == "") {
     console.error("no api key set!");
     errorCallBack("no api key set!");
   } else {
-    if(days < 1 || days > 5) {
-        errorCallBack("days is not between 1 to 5");
+    if (days < 1 || days > 5) {
+      errorCallBack("days is not between 1 to 5");
     } else {
       //console.log("Haetaan päivän sää-dataa paikalle " + paikka.nimi + "," + paikka.countrycode);
-      var req_url = "http://api.openweathermap.org/data/2.5/forecast?q=" + place.nimi + "," + place.countrycode + "&appid=" + openweathermapAPI + "&units=metric";
-      http.get(req_url, function(res) {
-        var body = '';
-        res.on('data', function(chunk) {
-            body += chunk;
+      const req_url = "http://api.openweathermap.org/data/2.5/forecast?q=" + place.nimi + "," + place.countrycode + "&appid=" + openweathermapAPI + "&units=metric";
+      http.get(req_url, (res) => {
+        let body = '';
+        res.on('data', (chunk) => {
+          body += chunk;
         });
-        res.on('end', function() {
-          var data = JSON.parse(body);
+        res.on('end', () => {
+          let data = JSON.parse(body);
           if (data != undefined && data.cod != '404') {
             console.log(data);
             data.dayAmount = days;
@@ -197,7 +161,7 @@ exports.getOpenWeatherData = (place, days, callBack, errorCallBack) => {
             callBack("Couldn't find that place. Try something else.")
           }
         });
-      }).on('error', function(e){
+      }).on('error', (e) => {
         console.log("Got an error: ", e);
         errorCallBack(e);
       });
@@ -205,54 +169,53 @@ exports.getOpenWeatherData = (place, days, callBack, errorCallBack) => {
   }
 }
 
-exports.getCurrentWeather = function(place, callBack) {
-  if(openweathermapAPI == "") {
+exports.getCurrentWeather = (place, callBack) => {
+  if (openweathermapAPI == "") {
     console.error("no api key set!");
   } else {
-    var req_url = "http://api.openweathermap.org/data/2.5/weather?q=" + place.nimi + "," + place.countrycode + "&appid=" + openweathermapAPI + "&units=metric";
-    http.get(req_url, function(res) {
-      var body = '';
-      res.on('data', function(chunk) {
-          body += chunk;
+    const req_url = "http://api.openweathermap.org/data/2.5/weather?q=" + place.nimi + "," + place.countrycode + "&appid=" + openweathermapAPI + "&units=metric";
+    http.get(req_url, (res) => {
+      let body = '';
+      res.on('data', (chunk) => {
+        body += chunk;
       });
-      res.on('end', function() {
-        var data = JSON.parse(body);
-
+      res.on('end', () => {
+        const data = JSON.parse(body);
         //console.log(output);
         callBack(data);
       });
-    }).on('error', function(e){
+    }).on('error', (e) => {
       console.log("Got an error: ", e);
       errorCallBack(e);
     });
   }
 }
 
-exports.getSunriseSunsetMessage = function(place, callBack) {
-  if(openweathermapAPI == "") {
+exports.getSunriseSunsetMessage = (place, callBack) => {
+  if (openweathermapAPI == "") {
     console.error("no api key set!");
   } else {
-    var req_url = "http://api.openweathermap.org/data/2.5/weather?q=" + place.nimi + "," + place.countrycode + "&appid=" + openweathermapAPI + "&units=metric";
-    http.get(req_url, function(res) {
-      var body = '';
-      res.on('data', function(chunk) {
-          body += chunk;
+    const req_url = "http://api.openweathermap.org/data/2.5/weather?q=" + place.nimi + "," + place.countrycode + "&appid=" + openweathermapAPI + "&units=metric";
+    http.get(req_url, (res) => {
+      let body = '';
+      res.on('data', (chunk) => {
+        body += chunk;
       });
-      res.on('end', function() {
-        var data = JSON.parse(body);
+      res.on('end', () => {
+        let data = JSON.parse(body);
 
         console.log(data.sys);
-        var sunrise = new Date(data.sys.sunrise);
-        var sunset = new Date(data.sys.sunset);
+        const sunrise = new Date(data.sys.sunrise);
+        const sunset = new Date(data.sys.sunset);
 
-        var output = place.nimi + " " + place.countrycode + ":\r\n";
+        let output = place.nimi + " " + place.countrycode + ":\r\n";
         output += "Sun rises at: " + sunrise.getHours() + ":" + sunrise.getMinutes() + "\r\n";
         output += "Sun sets at: " + sunset.getHours() + ":" + sunset.getMinutes() + "\r\n";
 
         //console.log(output);
         callBack(output);
       });
-    }).on('error', function(e){
+    }).on('error', (e) => {
       console.log("Got an error: ", e);
       errorCallBack(e);
     });
