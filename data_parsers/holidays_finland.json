@@ -1,128 +1,128 @@
 [
-    {
-        "date": "2017-12-31T22:00:00.000Z",
-        "dayname": "Monday",
-        "holidayName": "New Year's Day",
-        "holidayType": "National holiday"
-    },
-    {
-        "date": "2018-01-05T22:00:00.000Z",
-        "dayname": "Saturday",
-        "holidayName": "Epiphany",
-        "holidayType": "National holiday"
-    },
-    {
-        "date": "2018-03-19T22:00:00.000Z",
-        "dayname": "Tuesday",
-        "holidayName": "March equinox",
-        "holidayType": "Season"
-    },
-    {
-        "date": "2018-03-29T21:00:00.000Z",
-        "dayname": "Friday",
-        "holidayName": "Good Friday",
-        "holidayType": "National holiday"
-    },
-    {
-        "date": "2018-03-31T21:00:00.000Z",
-        "dayname": "Sunday",
-        "holidayName": "Easter Day",
-        "holidayType": "National holiday"
-    },
-    {
-        "date": "2018-04-01T21:00:00.000Z",
-        "dayname": "Monday",
-        "holidayName": "Easter Monday",
-        "holidayType": "National holiday"
-    },
-    {
-        "date": "2018-04-30T21:00:00.000Z",
-        "dayname": "Tuesday",
-        "holidayName": "May Day",
-        "holidayType": "National holiday"
-    },
-    {
-        "date": "2018-05-09T21:00:00.000Z",
-        "dayname": "Thursday",
-        "holidayName": "Ascension Day",
-        "holidayType": "National holiday"
-    },
-    {
-        "date": "2018-05-12T21:00:00.000Z",
-        "dayname": "Sunday",
-        "holidayName": "Mother's Day",
-        "holidayType": "De facto holiday"
-    },
-    {
-        "date": "2018-05-19T21:00:00.000Z",
-        "dayname": "Sunday",
-        "holidayName": "Whit Sunday",
-        "holidayType": "National holiday"
-    },
-    {
-        "date": "2018-06-20T21:00:00.000Z",
-        "dayname": "Thursday",
-        "holidayName": "June Solstice",
-        "holidayType": "Season"
-    },
-    {
-        "date": "2018-06-21T21:00:00.000Z",
-        "dayname": "Friday",
-        "holidayName": "Midsummer Eve",
-        "holidayType": "De facto holiday"
-    },
-    {
-        "date": "2018-06-22T21:00:00.000Z",
-        "dayname": "Saturday",
-        "holidayName": "Midsummer",
-        "holidayType": "National holiday"
-    },
-    {
-        "date": "2018-09-22T21:00:00.000Z",
-        "dayname": "Sunday",
-        "holidayName": "September equinox",
-        "holidayType": "Season"
-    },
-    {
-        "date": "2018-11-02T22:00:00.000Z",
-        "dayname": "Saturday",
-        "holidayName": "All Saints' Day",
-        "holidayType": "National holiday"
-    },
-    {
-        "date": "2018-11-10T22:00:00.000Z",
-        "dayname": "Sunday",
-        "holidayName": "Father's Day",
-        "holidayType": "De facto holiday"
-    },
-    {
-        "date": "2018-12-05T22:00:00.000Z",
-        "dayname": "Thursday",
-        "holidayName": "Independence Day",
-        "holidayType": "National holiday"
-    },
-    {
-        "date": "2018-12-20T22:00:00.000Z",
-        "dayname": "Friday",
-        "holidayName": "December Solstice",
-        "holidayType": "Season"
-    },
-    {
-        "date": "2018-12-23T22:00:00.000Z",
-        "dayname": "Monday",
-        "holidayName": "Christmas Eve",
-        "holidayType": "De facto holiday"
-    },
-    {
-        "date": "2018-12-24T22:00:00.000Z",
-        "dayname": "Tuesday",
-        "holidayName": "Christmas Day",
-        "holidayType": "National holiday"
-    },
-    {
-        "date": "2018-12-25T22:00:00.000Z",
-        "dayname": "Wednesday",
-        "holidayName": "St. Stephen's Day",
-        "holidayType": "National holiday"
-    }
+  {
+    "date": "2017-12-31T22:00:00.000Z",
+    "dayname": "Monday",
+    "holidayName": "New Year's Day",
+    "holidayType": "National holiday"
+  },
+  {
+    "date": "2018-01-05T22:00:00.000Z",
+    "dayname": "Saturday",
+    "holidayName": "Epiphany",
+    "holidayType": "National holiday"
+  },
+  {
+    "date": "2018-03-19T22:00:00.000Z",
+    "dayname": "Tuesday",
+    "holidayName": "March equinox",
+    "holidayType": "Season"
+  },
+  {
+    "date": "2018-03-29T21:00:00.000Z",
+    "dayname": "Friday",
+    "holidayName": "Good Friday",
+    "holidayType": "National holiday"
+  },
+  {
+    "date": "2018-03-31T21:00:00.000Z",
+    "dayname": "Sunday",
+    "holidayName": "Easter Day",
+    "holidayType": "National holiday"
+  },
+  {
+    "date": "2018-04-01T21:00:00.000Z",
+    "dayname": "Monday",
+    "holidayName": "Easter Monday",
+    "holidayType": "National holiday"
+  },
+  {
+    "date": "2018-04-30T21:00:00.000Z",
+    "dayname": "Tuesday",
+    "holidayName": "May Day",
+    "holidayType": "National holiday"
+  },
+  {
+    "date": "2018-05-09T21:00:00.000Z",
+    "dayname": "Thursday",
+    "holidayName": "Ascension Day",
+    "holidayType": "National holiday"
+  },
+  {
+    "date": "2018-05-12T21:00:00.000Z",
+    "dayname": "Sunday",
+    "holidayName": "Mother's Day",
+    "holidayType": "De facto holiday"
+  },
+  {
+    "date": "2018-05-19T21:00:00.000Z",
+    "dayname": "Sunday",
+    "holidayName": "Whit Sunday",
+    "holidayType": "National holiday"
+  },
+  {
+    "date": "2018-06-20T21:00:00.000Z",
+    "dayname": "Thursday",
+    "holidayName": "June Solstice",
+    "holidayType": "Season"
+  },
+  {
+    "date": "2018-06-21T21:00:00.000Z",
+    "dayname": "Friday",
+    "holidayName": "Midsummer Eve",
+    "holidayType": "De facto holiday"
+  },
+  {
+    "date": "2018-06-22T21:00:00.000Z",
+    "dayname": "Saturday",
+    "holidayName": "Midsummer",
+    "holidayType": "National holiday"
+  },
+  {
+    "date": "2018-09-22T21:00:00.000Z",
+    "dayname": "Sunday",
+    "holidayName": "September equinox",
+    "holidayType": "Season"
+  },
+  {
+    "date": "2018-11-02T22:00:00.000Z",
+    "dayname": "Saturday",
+    "holidayName": "All Saints' Day",
+    "holidayType": "National holiday"
+  },
+  {
+    "date": "2018-11-10T22:00:00.000Z",
+    "dayname": "Sunday",
+    "holidayName": "Father's Day",
+    "holidayType": "De facto holiday"
+  },
+  {
+    "date": "2018-12-05T22:00:00.000Z",
+    "dayname": "Thursday",
+    "holidayName": "Independence Day",
+    "holidayType": "National holiday"
+  },
+  {
+    "date": "2018-12-20T22:00:00.000Z",
+    "dayname": "Friday",
+    "holidayName": "December Solstice",
+    "holidayType": "Season"
+  },
+  {
+    "date": "2018-12-23T22:00:00.000Z",
+    "dayname": "Monday",
+    "holidayName": "Christmas Eve",
+    "holidayType": "De facto holiday"
+  },
+  {
+    "date": "2018-12-24T22:00:00.000Z",
+    "dayname": "Tuesday",
+    "holidayName": "Christmas Day",
+    "holidayType": "National holiday"
+  },
+  {
+    "date": "2018-12-25T22:00:00.000Z",
+    "dayname": "Wednesday",
+    "holidayName": "St. Stephen's Day",
+    "holidayType": "National holiday"
+  }
 ]

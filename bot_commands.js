@@ -1,5 +1,6 @@
 /*
-* juhis_bot.js made by Juho. Hi! C: https://github.com/crare/telegrambot
+* bot for running commands
+* This telegrambot is made by Crare. Hi! C: https://github.com/crare/telegrambot
 * parsers can be found in folder ./data_parsers
 * train-data from https://rata.digitraffic.fi/api/v1/doc/index.html
 * weather-data from https://openweathermap.org/api
@@ -7,18 +8,17 @@
 * happenings from http://www.webcal.fi/fi-FI/kalenterit.php
 */
 
+const startTime = new Date();
 // first load api keys and settings:
 // save your api keys in 'settings_template.json'
 // and change the name to 'settings.json'.
-const fs = require('fs')
-settings = JSON.parse(fs.readFileSync('./settings.json'));
+const settings = require('./settings.json');
 
 // get required modules.
 const Telegraf = require('telegraf');
 let cmdargs = require('commander');
 const diskspace = require('diskspace');
-let diskspace_path = "/var/www/html/";
-//const fs = require('fs'); // used for saving error logs in /tmp
+const diskspace_path = "/var/www/html/";
 
 const train_parser = require('./data_parsers/vr-trains.js');
 const weather_parser = require('./data_parsers/weather.js');
@@ -36,72 +36,72 @@ const ruuvi = require('./data_parsers/ruuvi.js');
 cmdargs
   .version('0.0.1')
   .option('-t, --test', 'Start running test version of the bot.')
-.parse(process.argv);
+  .option('-d, --debug', 'Debug, show console log')
+  .parse(process.argv);
 
 // setup bot
-let botToken = settings.prod_bot_key;
 let sendToChatId = settings.productionChatId;
 let botName = settings.botName;
-if(cmdargs.test) {
+
+const debug = cmdargs.debug ? true : false;
+if (cmdargs.test) {
   botToken = settings.test_bot_key;
   sendToChatId = settings.testChatId;
   botName = settings.testBotName;
 }
 const bot = new Telegraf(botToken)
 
-// setup api keys
-let api_key_openweathermap = settings.openweathermap;
-let api_key_watson_username = settings.watson_username;
-let api_key_watson_password = settings.watson_password;
-let api_key_giphy = settings.giphy;
-// and set them.
-weather_parser.setApiKey(api_key_openweathermap);
-voice_recognition.setApiKey(api_key_watson_username, api_key_watson_password, botToken);
-giphy_handler.setApiKey(api_key_giphy);
-
 // storing reminders.
 let reminders = [];
 let reminders_store_path = "./data/reminders.json";
-if(cmdargs.test) {
+if (cmdargs.test) {
   reminders_store_path = "./data/reminders_test.json";
 }
 //emojis
-var e_train   = '\u{1f686}';
-var e_train2   = '\u{1F682}';
+const e_train = '\u{1f686}';
+const e_train2 = '\u{1F682}';
+
+const extras_ = { parse_mode: 'Html' };
+
+debugLog = (output) => {
+  if (debug) {
+    console.log(output);
+  }
+}
 
 // milliseconds to more human readable format
 msToHumanReadable = (ms) => {
-    days = Math.floor(ms / (24*60*60*1000));
-    daysms=ms % (24*60*60*1000);
-    hours = Math.floor((daysms)/(60*60*1000));
-    hoursms=ms % (60*60*1000);
-    minutes = Math.floor((hoursms)/(60*1000));
-    minutesms=ms % (60*1000);
-    seconds = Math.floor((minutesms)/(1000));
-    output = "";
-    if(days > 0) {
-        output += days + " days ";
-    }
-    if(hours > 0) {
-        output += hours + " hours ";
-    }
-    if(minutes > 0) {
-        output += minutes + " minutes ";
-    }
-    if(seconds > 0) {
-        output += seconds + " seconds";
-    }
-    return output;
+  days = Math.floor(ms / (24 * 60 * 60 * 1000));
+  daysms = ms % (24 * 60 * 60 * 1000);
+  hours = Math.floor((daysms) / (60 * 60 * 1000));
+  hoursms = ms % (60 * 60 * 1000);
+  minutes = Math.floor((hoursms) / (60 * 1000));
+  minutesms = ms % (60 * 1000);
+  seconds = Math.floor((minutesms) / (1000));
+  output = "";
+  if (days > 0) {
+    output += days + " days ";
+  }
+  if (hours > 0) {
+    output += hours + " hours ";
+  }
+  if (minutes > 0) {
+    output += minutes + " minutes ";
+  }
+  if (seconds > 0) {
+    output += seconds + " seconds";
+  }
+  return output;
 }
 
-lastDay = (y,m) => {
-  return new Date(y, m +1, 0).getDate();
+lastDay = (y, m) => {
+  return new Date(y, m + 1, 0).getDate();
 }
 
 // HELP
-bot.command(['/h', '/help', '/help@'+botName], (ctx) => {
+bot.command(['/h', '/help', '/help@' + botName], (ctx) => {
   let output = "<b>Available commands:</b>\r\n";
-  output += "/ds Check diskspace at /var/www/html.\r\n";
+  output += "/ds Check diskspace at " + diskspace_path + "\r\n";
   output += "/f Flip a coin: output heads or tails.\r\n";
   output += "/gif Get gifs! \r\n";
   output += "/h Get this help message. \r\n";
@@ -119,76 +119,74 @@ bot.command(['/h', '/help', '/help@'+botName], (ctx) => {
   output += "This bot also sends daily messages about news-, train- and weather- data in mornings(at 7am mon-fri, 9am weekends) and afternoon(15:45 mon-fri)\r\n";
   output += "More information can be found by writing command without parameters after it.\r\n";
 
-  var chatId = ctx.update.message.chat.id;
-  var extras = {parse_mode: 'Html'};
-  bot.telegram.sendMessage(chatId, output, extras).then(function() {
-    console.log("Message sent.");
+  const chatId = ctx.update.message.chat.id;
+  bot.telegram.sendMessage(chatId, output, extras_).then(() => {
+    debugLog("Message sent.");
   })
 })
 
 //UPTIME 
-const startTime = new Date();
 bot.command(['/uptime', '/up'], (ctx) => {
-    console.log("uptime command called");
-    let now = new Date();
-    let uptime = now.getTime() - startTime.getTime();
-    console.log("uptime is " + uptime + " ms.");
-    var output = "I've been running since " + startTime.getHours() +":" + startTime.getMinutes() + " " + startTime.getDate() + "." + (startTime.getMonth()+1) + "." + startTime.getFullYear() + "\r\n";
-    output += "Uptime is " + uptime + " ms.\r\n";
-    output += "= " + msToHumanReadable(uptime);
-    ctx.reply(output);
+  debugLog("uptime command called");
+  let now = new Date();
+  let uptime = now.getTime() - startTime.getTime();
+  debugLog("uptime is " + uptime + " ms.");
+  let output = "I've been running since " + startTime.getHours() + ":" + startTime.getMinutes() + " " + startTime.getDate() + "." + (startTime.getMonth() + 1) + "." + startTime.getFullYear() + "\r\n";
+  output += "Uptime is " + uptime + " ms.\r\n";
+  output += "= " + msToHumanReadable(uptime);
+  ctx.reply(output);
 });
 
 // SUN
-bot.command(['/sunrise', '/sunset', '/dusk', '/dawn', '/sun'], (ctx)=> {
-  console.log("sun command called");
-  place = { nimi: "Lahti", countrycode: "FI", lat: 60.9827, lng: 25.6612};
-  sunrise_sunset.getSunDataAtLocation(place, function(sun_data) {
-    var output = "<b>Dusk till dawn at Lahti, Finland:</b> \r\n";
-        output += sun_data;
-    var chatId = ctx.update.message.chat.id;
-    var extras = {parse_mode: 'Html'};
-    bot.telegram.sendMessage(chatId, output, extras).then(function() {
-      console.log("Message sent.");
+bot.command(['/sunrise', '/sunset', '/dusk', '/dawn', '/sun'], (ctx) => {
+  debugLog("sun command called");
+  place = { name: settings.sun_place_name, countrycode: settings.countrycode, lat: settings.sun_at_lat, lng: settings.sun_at_lon };
+  sunrise_sunset.getSunDataAtLocation(place, (sun_data) => {
+    let output = "<b>Dusk till dawn at Lahti, Finland:</b> \r\n";
+    output += sun_data;
+    const chatId = ctx.update.message.chat.id;
+    const extras = { parse_mode: 'Html' };
+    bot.telegram.sendMessage(chatId, output, extras).then(() => {
+      debugLog("Message sent.");
     })
   });
 })
 
 // TRAINS
 bot.command(['/t', '/trains', '/junat'], (ctx) => {
-  console.log("trains command called");
+  debugLog("trains command called");
   let text = ctx.update.message.text.split(' ');
-  if(text.length == 1) {
-    var output = "/t /trains /junat is a command to get results from and to train station.\r\n";
+  if (text.length == 1) {
+    let output = "/t /trains /junat is a command to get results from and to train station.\r\n";
     output += "For example: '/trains Lahti Helsinki'\r\n";
     output += "First parameter 'Lahti' is departure station, \r\n";
     output += "and second parameter 'Helsinki' is destination.\r\n\r\n";
     output += "You can also use shortcodes for locations. \r\n";
     output += "For example: 'Lahti' is 'LH', 'Pasila' is 'PSL'. \r\n";
     output += "Get more info about certain station by: /station \r\n";
-    output += "Trains are divided to locomotive trains"+e_train2+" and long-distance trains"+e_train+" by emojis.\r\n";
+    output += "Trains are divided to locomotive trains" + e_train2 + " and long-distance trains" + e_train + " by emojis.\r\n";
 
-    var chatId = ctx.update.message.chat.id;
-    var extras = {parse_mode: 'Markdown'};
-    bot.telegram.sendMessage(chatId, output, extras).then(function() {
-      console.log("Message sent.");
+    const chatId = ctx.update.message.chat.id;
+    const extras = { parse_mode: 'Markdown' };
+    bot.telegram.sendMessage(chatId, output, extras).then(() => {
+      debugLog("Message sent.");
     })
-  } else if(text.length == 2) {
+  } else if (text.length == 2) {
     // 1 destination
     train_parser.haeAsemanJunat(text[1], false, 10, (output) => {
-      var chatId = ctx.update.message.chat.id;
-      var extras = {parse_mode: 'Markdown'};
-      bot.telegram.sendMessage(chatId, output, extras).then(function() {
-        console.log("Message sent.");
+      const chatId = ctx.update.message.chat.id;
+      const extras = { parse_mode: 'Markdown' };
+      bot.telegram.sendMessage(chatId, output, extras).then(() => {
+        debugLog("Message sent.");
       })
     });
   } else if (text.length == 3) {
     // 2 destinations
     train_parser.haeJunatReitille(text[1], text[2], 10, false, (output) => {
-      var chatId = ctx.update.message.chat.id;
-      var extras = {parse_mode: 'Markdown'};
-      bot.telegram.sendMessage(chatId, output, extras).then(function() {
-        console.log("Message sent.");
+      const chatId = ctx.update.message.chat.id;
+      const extras = { parse_mode: 'Markdown' };
+      bot.telegram.sendMessage(chatId, output, extras).then(() => {
+        debugLog("Message sent.");
       })
     });
   } else {
@@ -199,16 +197,16 @@ bot.command(['/t', '/trains', '/junat'], (ctx) => {
 
 // get train sations
 bot.command(['/st', '/station'], (ctx) => {
-  console.log("trains command called");
+  debugLog("trains command called");
   let text = ctx.update.message.text.split(' ');
-  if(text.length == 2) {
+  if (text.length == 2) {
     let station_name = text[1];
     let haeCargoJunat = false;
     train_parser.haeAsemanTiedot(station_name, (output) => {
-      var chatId = ctx.update.message.chat.id;
-      var extras = {parse_mode: 'Markdown'};
-      bot.telegram.sendMessage(chatId, output, extras).then(function() {
-        console.log("Message sent.");
+      const chatId = ctx.update.message.chat.id;
+      const extras = { parse_mode: 'Markdown' };
+      bot.telegram.sendMessage(chatId, output, extras).then(() => {
+        debugLog("Message sent.");
       })
     });
   } else {
@@ -219,26 +217,26 @@ bot.command(['/st', '/station'], (ctx) => {
 
 // WEATHER
 bot.command(['/w', '/weather', '/sää', '/saa'], (ctx) => {
-  console.log("weather command called");
+  debugLog("weather command called");
   let text = ctx.update.message.text.split(' ');
-  if(text.length == 1) {
-    var output = "/w /weather /sää /saa is a command to get weatherdata. \r\n";
+  if (text.length == 1) {
+    let output = "/w /weather /sää /saa is a command to get weatherdata. \r\n";
     output += "For example: '/weather Lahti' gives you weather-forecast for Lahti today.\r\n";
-    var chatId = ctx.update.message.chat.id;
-    var extras = {parse_mode: 'Markdown'};
-    bot.telegram.sendMessage(chatId, output, extras).then(function() {
-      console.log("Message sent.");
+    const chatId = ctx.update.message.chat.id;
+    const extras = { parse_mode: 'Markdown' };
+    bot.telegram.sendMessage(chatId, output, extras).then(() => {
+      debugLog("Message sent.");
     })
   } else if (text.length == 2) {
-    var place = new Object();
+    let place = new Object();
     place.nimi = text[1];
     place.countrycode = "FI"; // for now
     let days = 1;
     weather_parser.getOpenWeatherData(place, days, (output) => {
-      var chatId = ctx.update.message.chat.id;
-      var extras = {parse_mode: 'Markdown'};
-      bot.telegram.sendMessage(chatId, output, extras).then(function() {
-        console.log("Message sent.");
+      const chatId = ctx.update.message.chat.id;
+      const extras = { parse_mode: 'Markdown' };
+      bot.telegram.sendMessage(chatId, output, extras).then(() => {
+        debugLog("Message sent.");
       })
     });
   } else {
@@ -248,39 +246,39 @@ bot.command(['/w', '/weather', '/sää', '/saa'], (ctx) => {
 
 // PROVINCES = MAAKUNNAT
 bot.command(['/p', '/provinces'], (ctx) => {
-  console.log("provinces command called");
-  news_parser.getProvinces(function (provinces_output) {
-    var chatId = ctx.update.message.chat.id;
-    var extras = {parse_mode: 'Markdown'};
-    bot.telegram.sendMessage(chatId, provinces_output, extras).then(function() {
-      console.log("Message sent.");
+  debugLog("provinces command called");
+  news_parser.getProvinces((provinces_output) => {
+    const chatId = ctx.update.message.chat.id;
+    const extras = { parse_mode: 'Markdown' };
+    bot.telegram.sendMessage(chatId, provinces_output, extras).then(() => {
+      debugLog("Message sent.");
     })
   });
 })
 
 // NEWS
 bot.command(['/n', '/news', '/uutiset'], (ctx) => {
-  console.log("news command called");
+  debugLog("news command called");
   let text = ctx.update.message.text.split(' ');
-  if(text.length == 1 || text.length >= 4) {
-    news_parser.getHelpMessage(function(output) {
-      var chatId = ctx.update.message.chat.id;
-      var extras = {parse_mode: 'Markdown'};
-      bot.telegram.sendMessage(chatId, output, extras).then(function() {
-        console.log("Message sent.");
+  if (text.length == 1 || text.length >= 4) {
+    news_parser.getHelpMessage((output) => {
+      const chatId = ctx.update.message.chat.id;
+      const extras = { parse_mode: 'Markdown' };
+      bot.telegram.sendMessage(chatId, output, extras).then(() => {
+        debugLog("Message sent.");
       })
     });
-  } else if(text.length == 2 || text.length == 3) {
+  } else if (text.length == 2 || text.length == 3) {
     let lang = text[1];
     let province = text[2];
 
     news_parser.getYleNews(province, lang, 10, (output) => {
-      console.log(output);
+      debugLog(output);
       //ctx.reply(output);
-      var chatId = ctx.update.message.chat.id;
-      var extras = {parse_mode: 'Markdown'};
-      bot.telegram.sendMessage(chatId, output, extras).then(function() {
-        console.log("Message sent.");
+      const chatId = ctx.update.message.chat.id;
+      const extras = { parse_mode: 'Markdown' };
+      bot.telegram.sendMessage(chatId, output, extras).then(() => {
+        debugLog("Message sent.");
       })
     });
   }
@@ -288,10 +286,10 @@ bot.command(['/n', '/news', '/uutiset'], (ctx) => {
 
 // FLIP A COIN
 bot.command(['/f', '/flip', '/flipcoin', '/heads', '/tails'], (ctx) => {
-  console.log("flipping coin command called");
+  debugLog("flipping coin command called");
   let output = "";
   let side = Math.random(); // 0-1
-  console.log("side: " + side);
+  debugLog("side: " + side);
   if (side > 0.5) {
     output = "Heads";
   } else {
@@ -301,41 +299,40 @@ bot.command(['/f', '/flip', '/flipcoin', '/heads', '/tails'], (ctx) => {
 })
 
 // TEST
-bot.command(['/test'], (ctx)=> {
-  console.log("test command called");
-  var chatId = ctx.update.message.chat.id;
-  var extras = {parse_mode: 'HTML'};
-  var output = '<b>bold</b>, <strong>bold</strong>\r\n';
+bot.command(['/test'], (ctx) => {
+  debugLog("test command called");
+  const chatId = ctx.update.message.chat.id;
+  let output = '<b>bold</b>, <strong>bold</strong>\r\n';
   output += '<i>italic</i>, <em>italic</em>\r\n';
   output += '<a href="http://www.example.com/">inline URL</a>\r\n';
   output += '<a href="tg://user?id=258407019">inline mention of a user</a>\r\n';
   output += '<code>inline fixed-width code</code>\r\n';
   output += '<pre>pre-formatted fixed-width code block</pre>\r\n';
 
-  bot.telegram.sendMessage(chatId, output, extras).then(function() {
-    console.log("Message sent.");
+  bot.telegram.sendMessage(chatId, output, extras_).then(() => {
+    debugLog("Message sent.");
   })
 })
 
 // VOICE MESSAGE, telegram bot sees voice-message in chat
 bot.on('voice', (ctx) => {
-  console.log("voice message found");
+  debugLog("voice message found");
   let username = ctx.message.from.username;
-  console.log("Got voice message from @" + username);
-  console.log("Loading the audio file...");
+  debugLog("Got voice message from @" + username);
+  debugLog("Loading the audio file...");
 
-  voice_recognition.getFile(ctx.message.voice.file_id, function(localpath) {
+  voice_recognition.getFile(ctx.message.voice.file_id, (localpath) => {
 
-    console.log("File loaded. sending the audio to Watson...");
-    console.log("localpath: " + localpath);
-    voice_recognition.speechToText(localpath, function(result) {
+    debugLog("File loaded. sending the audio to Watson...");
+    debugLog("localpath: " + localpath);
+    voice_recognition.speechToText(localpath, (result) => {
 
-      console.log("Watson found keywords: ");
-      console.log(result.keywords);
-      console.log("Watson returned the message:");
-      console.log(result.text + "\n");
+      debugLog("Watson found keywords: ");
+      debugLog(result.keywords);
+      debugLog("Watson returned the message:");
+      debugLog(result.text + "\n");
 
-      if(result.text != undefined) {
+      if (result.text != undefined) {
         ctx.reply("Watson thinks @" + username + " said: " + result.text);
       } else {
         ctx.reply("Couldn't get Watson results, please try again.");
@@ -346,8 +343,8 @@ bot.on('voice', (ctx) => {
 
 // get gifs
 bot.command(['/gif'], (ctx) => {
-  console.log("gif command called");
-  var chatId = ctx.update.message.chat.id;
+  debugLog("gif command called");
+  const chatId = ctx.update.message.chat.id;
   let text = ctx.update.message.text.split(' ');
 
   if (text.length == 2) {
@@ -355,11 +352,11 @@ bot.command(['/gif'], (ctx) => {
     let query = text[1];
     let amount = 1;
 
-    giphy_handler.getGifs(query, amount, function(gif_urls) {
-      for(let i = 0; i < gif_urls.length; i++) {
+    giphy_handler.getGifs(query, amount, (gif_urls) => {
+      for (let i = 0; i < gif_urls.length; i++) {
         let photo = gif_urls[i];
-        bot.telegram.sendDocument(chatId, photo).then(function() {
-          console.log("Message sent.");
+        bot.telegram.sendDocument(chatId, photo).then(() => {
+          debugLog("Message sent.");
         })
       }
     })
@@ -368,40 +365,40 @@ bot.command(['/gif'], (ctx) => {
     let query = text[1];
     let amount = text[2];
 
-    giphy_handler.getGifs(query, amount, function(gif_urls) {
-      for(let i = 0; i < gif_urls.length; i++) {
+    giphy_handler.getGifs(query, amount, (gif_urls) => {
+      for (let i = 0; i < gif_urls.length; i++) {
         let photo = gif_urls[i];
-        if(photo == undefined) {
-            console.log("undefined photo url!");
+        if (photo == undefined) {
+          debugLog("undefined photo url!");
         } else {
-          bot.telegram.sendDocument(chatId, photo).then(function() {
-            console.log("Message sent.");
+          bot.telegram.sendDocument(chatId, photo).then(() => {
+            debugLog("Message sent.");
           })
         }
       }
-      if(gif_urls.length < amount) {
+      if (gif_urls.length < amount) {
         ctx.reply("Didn't find " + (amount - gif_urls.length) + "/" + amount + " gifs, sorry!");
       }
     })
   } else {
-      ctx.reply("Give parameter as searchword for gifs. example: '/gif cats' or '/gif dogs 3' if you want multiple just add number at the end(limit 10).");
+    ctx.reply("Give parameter as searchword for gifs. example: '/gif cats' or '/gif dogs 3' if you want multiple just add number at the end(limit 10).");
   }
 });
 
 
 // get random gifs
 bot.command(['/randomgif', '/rg'], (ctx) => {
-  console.log("random gif command called");
-  var chatId = ctx.update.message.chat.id;
+  debugLog("random gif command called");
+  const chatId = ctx.update.message.chat.id;
   let text = ctx.update.message.text.split(' ');
   let tag = undefined;
   if (text.length == 2) {
     tag = text[1];
   }
-  giphy_handler.getRandomGif(tag, function(gif) {
-    if(gif != undefined) {
-      bot.telegram.sendDocument(chatId, gif).then(function() {
-        console.log("Message sent.");
+  giphy_handler.getRandomGif(tag, (gif) => {
+    if (gif != undefined) {
+      bot.telegram.sendDocument(chatId, gif).then(() => {
+        debugLog("Message sent.");
       })
     }
   });
@@ -410,16 +407,16 @@ bot.command(['/randomgif', '/rg'], (ctx) => {
 // load reminders
 reminder.loadRemindersJSON(reminders_store_path, (reminders_array) => {
   reminders = reminders_array;
-  console.log("loaded " + reminders.length + " reminders");
-  if(reminders.length > 0) {
+  debugLog("loaded " + reminders.length + " reminders");
+  if (reminders.length > 0) {
     reminder.setupRemindersRunning(reminders, bot, (reminders_truncated) => {
       reminders = reminders_truncated; // truncated out reminders that have been already passed.
       reminder.saveRemindersJSON(reminders, reminders_store_path);
 
-      var chatId = "258407019"; // send Juho a message for debugging
-      var output = "<b>" + reminders.length + " reminders running active.</b>";
-      bot.telegram.sendMessage(chatId, start_message, extras).then(function() {
-        console.log("Message sent.");
+      const chatId = "258407019"; // send Juho a message for debugging
+      let output = "<b>" + reminders.length + " reminders running active.</b>";
+      bot.telegram.sendMessage(chatId, start_message, extras_).then(() => {
+        debugLog("Message sent.");
       })
     });
   }
@@ -427,8 +424,8 @@ reminder.loadRemindersJSON(reminders_store_path, (reminders_array) => {
 
 // REMINDER
 bot.command(['/remind', '/re'], (ctx) => {
-  console.log("remind command called");
-  //console.log(ctx.message);
+  debugLog("remind command called");
+  //debugLog(ctx.message);
   let chatId = ctx.update.message.chat.id;
   let user_id = ctx.message.from.id;
   let username = ctx.message.from.username;
@@ -437,79 +434,76 @@ bot.command(['/remind', '/re'], (ctx) => {
     username = ctx.message.from.first_name;
   }
   let unparsed_text = ctx.update.message.text;
-  let extras = {parse_mode: 'HTML'};
 
   try {
-    reminder.createNewReminder(chatId, user_id, username, unparsed_text, function(reminder_obj) {
-      //console.log(reminder_obj);
+    reminder.createNewReminder(chatId, user_id, username, unparsed_text, (reminder_obj) => {
+      //debugLog(reminder_obj);
       reminders.push(reminder_obj);
       reminder.saveRemindersJSON(reminders, reminders_store_path);
 
       reminder.setupReminderRunning(reminder_obj, bot, (reminder_obj) => {
         // reminder has been called.
-        if(reminders.indexOf(reminder_obj) != -1) {
+        if (reminders.indexOf(reminder_obj) != -1) {
           // remove called reminder from reminders
-          reminders = reminders.splice(reminders.indexOf(reminder_obj)-1, 1);
+          reminders = reminders.splice(reminders.indexOf(reminder_obj) - 1, 1);
           reminder.saveRemindersJSON(reminders, reminders_store_path);
         }
       });
-    }, function(err) {
-      bot.telegram.sendMessage(chatId, err, extras).then(function() {
-          console.log("Error message sent.");
-        })
+    }, (err) => {
+      bot.telegram.sendMessage(chatId, err, extras_).then(() => {
+        debugLog("Error message sent.");
+      })
     });
-  } catch(err) {
+  } catch (err) {
     console.error(err);
   }
 });
 
 bot.command(['/reminders', '/res'], (ctx) => {
-  console.log("reminders command called");
+  debugLog("reminders command called");
   let chatId = ctx.update.message.chat.id;
   let output = "There is ";
   if (reminders.length <= 0) {
     output += "no reminders active.";
-  } else if(reminders.length == 1) {
+  } else if (reminders.length == 1) {
     output += reminders.length + " reminder active.";
   } else {
     output += reminders.length + " reminders active.";
   }
-  let extras = {parse_mode: 'HTML'};
-  bot.telegram.sendMessage(chatId, output, extras).then(function() {
-    console.log("Message sent.");
+  bot.telegram.sendMessage(chatId, output, extras_).then(() => {
+    debugLog("Message sent.");
   })
 });
 
 // removes keyboard. (because messing around is fun, and then you have to clean it up.)
 /*bot.command(['/removeKeyboard'], (ctx) => {
- var chatId = ctx.update.message.chat.id;
-    var extras = {reply_markup: {remove_keyboard: true}};
-    var output = 'Removed keyboard!';
-    bot.telegram.sendMessage(chatId, output, extras).then(function() {
-     console.log("Message sent. Keyboard removed.");
+ const chatId = ctx.update.message.chat.id;
+    const extras = {reply_markup: {remove_keyboard: true}};
+    let output = 'Removed keyboard!';
+    bot.telegram.sendMessage(chatId, output, extras).then(() => {
+     debugLog("Message sent. Keyboard removed.");
    })
 });*/
 
 bytesToSize = (bytes) => {
-   var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-   if (bytes == 0) return '0 Byte';
-   var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-   return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  if (bytes == 0) return '0 Byte';
+  const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+  return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
 };
 
 bot.command(['/space', '/disk', '/diskspace', '/ds'], (ctx) => {
   let chatId = ctx.update.message.chat.id;
-  diskspace.check(diskspace_path, function (err, result)
-  { 
+  diskspace.check(diskspace_path, (err, result) => {
     let output = "*Diskspace at* " + diskspace_path + "\r\n";
     output += "*Total:* " + bytesToSize(result.total) + " 100% \r\n";
-    output += "*Used:* " + bytesToSize(result.used) + " " + ((result.used/result.total) * 100).toFixed(2) + "% " + "\r\n";
-    output += "*Free:*  " + bytesToSize(result.free) + " " + ((result.free/result.total) * 100).toFixed(2) + "% " + "\r\n";
+    output += "*Used:* " + bytesToSize(result.used) + " " + ((result.used / result.total) * 100).toFixed(2) + "% " + "\r\n";
+    output += "*Free:*  " + bytesToSize(result.free) + " " + ((result.free / result.total) * 100).toFixed(2) + "% " + "\r\n";
     output += "*Status:* " + result.status + "\r\n";
 
-    var extras = {parse_mode: 'Markdown'};
-    bot.telegram.sendMessage(chatId, output, extras).then(function() {
-      console.log("Send diskspace message.");
+    const extras = { parse_mode: 'Markdown' };
+    bot.telegram.sendMessage(chatId, output, extras).then(() => {
+      debugLog("Send diskspace message.");
     })
   });
 })
@@ -518,63 +512,60 @@ bot.command(['/space', '/disk', '/diskspace', '/ds'], (ctx) => {
 
 // Get movies on TV 2
 bot.command(['/movies2', '/films2'], (ctx) => {
-  console.log("get movies2 called");
+  debugLog("get movies2 called");
   let chatId = ctx.update.message.chat.id;
-  movies.getAmpparitMoviesOnTV( (output) => {
-    let extras = {parse_mode: 'Html'};
-    bot.telegram.sendMessage(chatId, output, extras).then(function() {
-      console.log("Movies message sent.");
+  movies.getAmpparitMoviesOnTV((output) => {
+    bot.telegram.sendMessage(chatId, output, extras_).then(() => {
+      debugLog("Movies message sent.");
     })
   })
 })
 
 // Get movies on TV
 bot.command(['/movies', '/films'], (ctx) => {
-  console.log("get movies called");
+  debugLog("get movies called");
   let chatId = ctx.update.message.chat.id;
   let useHtmlMarkdown = true;
   let only_today = false;
   movies.getMoviesOnTV(useHtmlMarkdown, only_today, (output) => {
-    let extras = {parse_mode: 'Html'};
-    bot.telegram.sendMessage(chatId, output, extras).then(function() {
-      console.log("Movies message sent.");
+    bot.telegram.sendMessage(chatId, output, extras_).then(() => {
+      debugLog("Movies message sent.");
     })
   })
 })
 
 // get chat id
 bot.command(['/chatId', '/id'], (ctx) => {
-  console.log("This chat's id is: " + ctx.update.message.chat.id);
+  debugLog("This chat's id is: " + ctx.update.message.chat.id);
   ctx.reply("This chat's id is: " + ctx.update.message.chat.id);
 });
 
 
 // get flagging-day today
 bot.command(['/flag', '/flagday'], (ctx) => {
-  console.log("flagday command called.");
-  flagdays.getFlagdayToday((output)=> {
+  debugLog("flagday command called.");
+  flagdays.getFlagdayToday((output) => {
     ctx.reply(output);
   });
 });
 
 // get holiday today
 bot.command(['/hday', '/holiday'], (ctx) => {
-  console.log("holiday command called.");
-  holidays.getHolidayToday((output)=> {
+  debugLog("holiday command called.");
+  holidays.getHolidayToday((output) => {
     ctx.reply(output);
   });
 });
 
 // get ruuvitag info
-bot.command(['/tag','/ruuvi' ,'/ruuvitag'], (ctx)=> {
-  console.log("ruuvitag command called.");
-  let tag = {id: settings.ruuvitag_id, name: settings.ruuvitag_name};
+bot.command(['/tag', '/ruuvi', '/ruuvitag'], (ctx) => {
+  debugLog("ruuvitag command called.");
+  let tag = { id: settings.ruuvitag_id, name: settings.ruuvitag_name };
   let chatId = ctx.update.message.chat.id;
   ruuvi.getRuuviTagData(tag, (output) => {
-    console.log(output);
-    let extras = {parse_mode: 'Html'};
-    bot.telegram.sendMessage(chatId, output, extras).then(function() {
-      console.log("Movies message sent.");
+    debugLog(output);
+    bot.telegram.sendMessage(chatId, output, extras_).then(() => {
+      debugLog("Movies message sent.");
     })
   })
 });
@@ -585,16 +576,15 @@ bot.command(['/tag','/ruuvi' ,'/ruuvitag'], (ctx)=> {
 
 // handle errors, this won't find them all, only the ones that throw error.
 bot.catch((err) => {
-  console.log('Ooops error happened!')
+  debugLog('Ooops error happened!')
   console.error(err);
 })
 
-console.log("bot running!");
+debugLog("bot running!");
 bot.startPolling()
 
 // send message chat that the bot is running.
-var extras = {parse_mode: 'Html'};
-var start_message = "bot started running!";
-bot.telegram.sendMessage(sendToChatId, start_message, extras).then(function() {
-  console.log("Message sent.");
+const start_message = "bot started running!";
+bot.telegram.sendMessage(sendToChatId, start_message, extras_).then(() => {
+  debugLog("Message sent.");
 })

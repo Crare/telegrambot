@@ -4,7 +4,12 @@
   "description": "Telegrambot that tells weather, news, train schedules etc.",
   "main": "bot_commands.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node bot_commands.js",
+    "testbot": "node bot_commands.js --test",
+    "foreverbot": "forever start bot_commands.js",
+    "forevertestbot": "forever start bot_commands.js --test",
+    "stopbot": "forever stop bot_commands.js",
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -28,5 +33,8 @@
     "telegraf": "^3.24.0",
     "watson-developer-cloud": "^3.11.0",
     "xml2json": "^0.11.2"
+  },
+  "devDependencies": {
+    "mocha": "^6.2.0"
   }
 }
