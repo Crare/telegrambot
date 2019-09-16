@@ -38,6 +38,7 @@ const happenings = require('./data_parsers/happenings.js');
 const flagdays = require('./data_parsers/flagdays.js');
 const holidays = require('./data_parsers/holidays.js');
 const movies = require('./data_parsers/movies.js');
+const lunch_menu = require('./data_parsers/lunch_menu.js');
 
 /*
 lat float
@@ -69,7 +70,7 @@ cmdargs
   .option('--weekend', 'Show weekend message')
   .option('--diskspace', 'Displays diskspace at /var/www/html/ used,total,free space.')
 
-// new commands for building daily message with command-parameters.
+  // new commands for building daily message with command-parameters.
   .option('--newCommands', 'Build a message with command parameters.')
   .option('-w, --weather', 'Show weather forecast.')
   .option('--lat <n>', 'Latitude coordinate for weather. (otherwise uses settings.lat)', parseFloat)
@@ -85,8 +86,10 @@ cmdargs
   .option('-m, --movies', 'Show todays movies.')
   .option('-f, --flags', 'Show flagday information if today is flagday.')
   .option('-n, --news', 'Show news for today.')
+  .option('-l, --l_week', 'Show lunch menu for this week.')
+  .option('-l, --l_today', 'Show lunch menu for today.')
 
-.parse(process.argv);
+  .parse(process.argv);
 
 // setup bot
 let botToken = settings.prod_bot_key;
@@ -428,14 +431,14 @@ bytesToSize = (bytes) => {
 
 getDiskSpaceMessage = (path, callback) => {
   let output = "";
-  diskspace.check(path, (err, result) => { 
-    if(err) {
+  diskspace.check(path, (err, result) => {
+    if (err) {
       callback("Couldn't get diskspace at path: " + path);
     } else {
       output += "*Diskspace at* " + path + "\r\n";
       output += "*Total:* " + bytesToSize(result.total) + " 100% \r\n";
-      output += "*Used:* " + bytesToSize(result.used) + " " + ((result.used/result.total) * 100).toFixed(2) + "% " + "\r\n";
-      output += "*Free:*  " + bytesToSize(result.free) + " " + ((result.free/result.total) * 100).toFixed(2) + "% " + "\r\n";
+      output += "*Used:* " + bytesToSize(result.used) + " " + ((result.used / result.total) * 100).toFixed(2) + "% " + "\r\n";
+      output += "*Free:*  " + bytesToSize(result.free) + " " + ((result.free / result.total) * 100).toFixed(2) + "% " + "\r\n";
       output += "*Status:* " + result.status + "\r\n";
       callback(output);
     }
@@ -461,7 +464,7 @@ buildMessageWithCommands = () => {
   let output = "";
 
   // first greeting message
-  if(cmdargs.morning) {
+  if (cmdargs.morning) {
     output += getRandomMorningGreeting();
   } else if (cmdargs.evening) {
     output += getEveningMessage();
@@ -483,45 +486,45 @@ buildMessageWithCommands = () => {
     lng: settings.sun_at_lon,
     province: undefined
   }
-  if(cmdargs.lon) {
+  if (cmdargs.lon) {
     place.lon = cmdargs.lon;
   }
-  if(cmdargs.lat) {
+  if (cmdargs.lat) {
     place.lon = cmdargs.lat;
   }
-  if(cmdargs.country) {
+  if (cmdargs.country) {
     place.lon = cmdargs.country;
   }
-  if(cmdargs.city) {
+  if (cmdargs.city) {
     place.nimi = cmdargs.city;
   }
 
-/*
-lat float
-lon float
-country string
-city string
-
-weather bool
-sunrise_sunset bool
-diskspace bool
-trains bool
-  trains_from string
-  trains_to string
-  trains_amount int
-happenings bool
-holidays bool
-movies bool
-flags bool
-news bool
-*/
+  /*
+  lat float
+  lon float
+  country string
+  city string
+  
+  weather bool
+  sunrise_sunset bool
+  diskspace bool
+  trains bool
+    trains_from string
+    trains_to string
+    trains_amount int
+  happenings bool
+  holidays bool
+  movies bool
+  flags bool
+  news bool
+  */
 
   if (cmdargs.weather) {
     waterfall_functions.push(
       (callback) => {
         weather_parser.getOpenWeatherData(place, 3, (weather_forecast) => {
-            output += weather_forecast + "\r\n";
-            callback();
+          output += weather_forecast + "\r\n";
+          callback();
         });
       }
     );
@@ -554,7 +557,7 @@ news bool
     let trains_amount = cmdargs.trains_amount;
     let getCargoTrains = false;
 
-    if(trains_from != undefined && trains_to != undefined) {
+    if (trains_from != undefined && trains_to != undefined) {
       waterfall_functions.push(
         (callback) => {
           train_parser.haeJunatReitille(trains_from, trains_to, trains_amount, getCargoTrains, (trains) => {
@@ -580,7 +583,7 @@ news bool
   if (cmdargs.holidays) {
     waterfall_functions.push(
       (callback) => {
-        holidays.getHolidayToday((holiday)=> {
+        holidays.getHolidayToday((holiday) => {
           output += holiday + "\r\n";
           callback();
         });
@@ -604,7 +607,7 @@ news bool
   if (cmdargs.flags) {
     waterfall_functions.push(
       (callback) => {
-        flagdays.getFlagdayToday((flagday_)=> {
+        flagdays.getFlagdayToday((flagday_) => {
           output += flagday_ + "\r\n";
           callback();
         });
@@ -620,7 +623,26 @@ news bool
           callback();
         });
       }
-    );
+    )
+  };
+
+  if (cmdargs.l_week) {
+    waterfall_functions.push(
+      (callback) => {
+        lunch_menu.getMenuForWeek((menu) => {
+          output += menu + "\r\n";
+          callback();
+        });
+      });
+  }
+  if (cmdargs.l_today) {
+    waterfall_functions.push(
+      (callback) => {
+        lunch_menu.getMenuToday((menu) => {
+          output += menu + "\r\n";
+          callback();
+        });
+      });
   }
 
   // run waterfall functions and return output message to chat.
@@ -641,7 +663,7 @@ if (cmdargs.newCommands) {
   buildMessageWithCommands();
 } else {
   // call message functions, depending on arguments
-  if(cmdargs.morning) {
+  if (cmdargs.morning) {
     debugLog("morning message");
     show_morning_message(sendToChatId);
 
