@@ -661,3 +661,4 @@ if (cmdargs.newCommands) {
     debugLog("WeekendMessage");
     show_weekend_message(sendToChatId);
   }
+}
