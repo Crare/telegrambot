@@ -27,6 +27,10 @@ const test_data = {
       countrycode: "FI"
     },
     days: 5
+  },
+  news : {
+    province: "Uusimaa",
+    lang: "fi"
   }
 };
 
@@ -111,6 +115,16 @@ describe('News', () => {
   describe('getProvinces', () => {
     it('should get parsed response from API', (done) => {
       news_parser.getProvinces((output) => {
+        debugLog(output);
+        exists(output, done);
+      });
+    });
+  });
+
+
+  describe('getYleNews', () => {
+    it('should get parsed response from API', (done) => {
+      news_parser.getYleNews(test_data.news.province, test_data.news.lang, 10, (output) => {
         debugLog(output);
         exists(output, done);
       });

@@ -113,7 +113,7 @@ setupRequestData = (place, lang) => {
       }
     }
   }
-  console.log(req);
+  // console.log(req);
   return req;
 }
 
@@ -141,12 +141,12 @@ exports.getProvinces = (callback) => {
 exports.getYleNews = (province, lang, newsAmount, callback) => {
   // parse input little bit.
   let place = new Object();
-  if (lang.toLowerCase() == "en" ||
-    lang.toLowerCase() == "fi" ||
-    lang.toLowerCase() == "ru" ||
-    lang.toLowerCase() == "sa" ||
-    lang.toLowerCase() == "simplefi") {
-    lang = lang.toLowerCase();
+  lang = lang.toLowerCase();
+  if (lang == "en" ||
+    lang == "fi" ||
+    lang == "ru" ||
+    lang == "sa" ||
+    lang == "simplefi") {
 
     place.province = province;
     let req = setupRequestData(place, lang); // setup request data.
