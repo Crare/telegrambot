@@ -1,13 +1,12 @@
 // giphy.js
 // gifs from giphy
 
+const settings = require('../settings.json');
+
 const GphApiClient = require('giphy-js-sdk-core')
 
-let client = undefined;
+const client = GphApiClient(settings.giphy);
 
-exports.setApiKey = (api_key) => {
-  client = GphApiClient(api_key);
-}
 
 exports.getGifs = (query, amount, callback) => {
   if (client == undefined) {

@@ -12,17 +12,16 @@ const Telegraf = require('telegraf')
 const https = require('https');
 const SpeechToTextV1 = require('watson-developer-cloud/speech-to-text/v1');
 
+const settings = require('../settings.json');
+speech_to_text = new SpeechToTextV1({
+  username: settings.watson_username,
+  password: settings.watson_password
+});
+botToken = settings.test_bot_key; // or use settings.prod_bot_key
+
 const { Markup } = Telegraf
 let botToken;
 let speech_to_text = undefined;
-
-exports.setApiKey = (username_, password_, botToken_) => {
-  speech_to_text = new SpeechToTextV1({
-    username: username_,
-    password: password_
-  });
-  botToken = botToken_;
-}
 
 downloadFile = (url, dest, cb) => {
   let file = fs.createWriteStream(dest);

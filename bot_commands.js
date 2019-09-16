@@ -8,6 +8,7 @@
 * happenings from http://www.webcal.fi/fi-FI/kalenterit.php
 */
 
+const startTime = new Date();
 // first load api keys and settings:
 // save your api keys in 'settings_template.json'
 // and change the name to 'settings.json'.
@@ -39,27 +40,16 @@ cmdargs
   .parse(process.argv);
 
 // setup bot
-let botToken = settings.prod_bot_key;
 let sendToChatId = settings.productionChatId;
 let botName = settings.botName;
 
-let debug = cmdargs.debug ? true : false;
+const debug = cmdargs.debug ? true : false;
 if (cmdargs.test) {
   botToken = settings.test_bot_key;
   sendToChatId = settings.testChatId;
   botName = settings.testBotName;
 }
 const bot = new Telegraf(botToken)
-
-// setup api keys
-let api_key_openweathermap = settings.openweathermap;
-let api_key_watson_username = settings.watson_username;
-let api_key_watson_password = settings.watson_password;
-let api_key_giphy = settings.giphy;
-// and set them.
-weather_parser.setApiKey(api_key_openweathermap);
-voice_recognition.setApiKey(api_key_watson_username, api_key_watson_password, botToken);
-giphy_handler.setApiKey(api_key_giphy);
 
 // storing reminders.
 let reminders = [];
@@ -136,7 +126,6 @@ bot.command(['/h', '/help', '/help@' + botName], (ctx) => {
 })
 
 //UPTIME 
-const startTime = new Date();
 bot.command(['/uptime', '/up'], (ctx) => {
   debugLog("uptime command called");
   let now = new Date();

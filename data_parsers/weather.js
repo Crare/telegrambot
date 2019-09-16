@@ -4,11 +4,8 @@
 const http = require('http');
 const { URL } = require('url');
 
-let openweathermapAPI = "";
-
-exports.setApiKey = (api_key) => {
-  openweathermapAPI = api_key;
-}
+const settings = require('../settings.json');
+let openweathermapAPI = settings.openweathermap;
 
 /*  preserve:start */
 //Openweathermap Weather codes and corressponding emojis
@@ -152,7 +149,7 @@ exports.getOpenWeatherData = (place, days, callBack, errorCallBack) => {
         res.on('end', () => {
           let data = JSON.parse(body);
           if (data != undefined && data.cod != '404') {
-            console.log(data);
+            // console.log(data);
             data.dayAmount = days;
             output = tulostaOpenweatherData(data);
             //console.log(output);
