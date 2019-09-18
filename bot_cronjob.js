@@ -40,39 +40,37 @@ const holidays = require('./data_parsers/holidays.js');
 const movies = require('./data_parsers/movies.js');
 const lunch_menu = require('./data_parsers/lunch_menu.js');
 
-/*
-lat float
-lon float
-country string
-city string
+// crontab examples:
 
-weather bool
-sunrise_sunset bool
-diskspace string
-trains bool
-  trains_from string
-  trains_to string
-  trains_amount int
-happenings bool
-holidays bool
-movies bool
-flags bool
-news bool
-*/
+// morning
+// node bot_cronjob.js --test -m -WshHFNg
+
+// evening
+// node bot_cronjob.js --test -e -WM
+
+// friday evening
+// node bot_cronjob.js --test -e -f -WMg
+
+// weekend
+// node bot_cronjob.js --test -w -WshHFNM
+
+// lunch menu for week
+// node bot_cronjob.js --test --l_week
+
+// lunch menu for today
+// node bot_cronjob.js --test --l_today
 
 // commands
 cmdargs
   .version('0.0.1')
   .option('--test', 'send messages to test bot instead of production bot.')
-  .option('-M, --morning', 'Show morning message')
+  .option('-m, --morning', 'Show morning message')
   .option('-e, --evening', 'Show evening message')
-  .option('-F, --friday', 'Show friday message')
-  .option('-W, --weekend', 'Show weekend message')
+  .option('-f, --friday', 'Show friday message')
+  .option('-w, --weekend', 'Show weekend message')
   .option('-d, --diskspace', 'Displays diskspace at /var/www/html/ used,total,free space.')
 
-  // new commands for building daily message with command-parameters.
-  .option('-n, --newCommands', 'Build a message with command parameters.')
-  .option('-w, --weather', 'Show weather forecast.')
+  .option('-W, --weather', 'Show weather forecast.')
   .option('--lat <n>', 'Latitude coordinate for weather. (otherwise uses settings.lat)', parseFloat)
   .option('--lon <n>', 'Longitude coordinate for weather. (otherwise uses settings.lon)', parseFloat)
   .option('-s, --sunrise_sunset', 'Show sunrise and sunset time.')
@@ -83,11 +81,14 @@ cmdargs
   .option('--trains_amount <n>', 'Amount of train-schedules shown.', parseInt)
   .option('-h, --happenings', 'Show happenings for today.')
   .option('-H, --holidays', 'Show special holiday if today is holiday.')
-  .option('-m, --movies', 'Show todays movies.')
-  .option('-f, --flags', 'Show flagday information if today is flagday.')
+  .option('-M, --movies', 'Show todays movies.')
+  .option('-F, --flags', 'Show flagday information if today is flagday.')
   .option('-N, --news', 'Show news for today.')
-  .option('-l, --l_week', 'Show lunch menu for this week.')
-  .option('-l, --l_today', 'Show lunch menu for today.')
+  .option('--l_week', 'Show lunch menu for this week.')
+  .option('--l_today', 'Show lunch menu for today.')
+  .option('-g, --giphy', 'Show gifs from giphy.')
+
+  .option('--message <s>', 'Sends message')
 
   .parse(process.argv);
 
@@ -154,266 +155,6 @@ getWeekendMessage = () => {
   return "*Have a nice weekend!" + "*\r\n";
 }
 
-show_morning_message = (chatId) => {
-  debugLog("setting daily morning message.");
-  let place = { nimi: settings.morning_weather_at, countrycode: settings.countrycode, lat: settings.sun_at_lat, lng: settings.sun_at_lon }
-
-  let weather = "";
-  let train = "";
-  let news = "";
-  let sunrise = "";
-  let happening = "";
-  let flagday = "";
-  let holiday = "";
-
-  async.waterfall([
-    (callback) => {
-      weather_parser.getOpenWeatherData(place, 1, (weather_forecast) => {
-        weather = weather_forecast;
-        callback();
-      });
-    },
-    (callback) => {
-      train_parser.haeJunatReitille(settings.morning_trains_from, settings.morning_trains_to, 5, false, (trains) => {
-        train = trains;
-        callback();
-      });
-    },
-    (callback) => {
-      news_parser.getYleNews(undefined, defaultLang, 5, (news_) => {
-        news = news_;
-        callback();
-      });
-    },
-    (callback) => {
-      sunrise_sunset.getSunDataAtLocation(place, (sun_data) => {
-        sunrise = sun_data;
-        callback();
-      });
-    },
-    (callback) => {
-      happenings.getHappeningsTodayString((happenings_string) => {
-        happening = happenings_string;
-        callback();
-      });
-    },
-    (callback) => {
-      holidays.getHolidayToday((holiday_) => {
-        holiday = holiday_;
-        callback();
-      });
-    },
-    (callback) => {
-      flagdays.getFlagdayToday((flagday_) => {
-        flagday = flagday_;
-        callback();
-      });
-    }
-  ], (err, result) => {
-
-    // get random morning message
-    let output = "";
-    const rand_i = Math.floor(Math.random() * morning_greetings.length);
-    output += "" + morning_greetings[rand_i] + "\r\n";
-    debugLog(morning_greetings[rand_i]);
-    debugLog(rand_i);
-
-    const date = new Date();
-    hours = date.getHours();
-    if (hours < 10) { hours = "0" + hours; }
-    minutes = date.getMinutes()
-    if (minutes < 10) { minutes = "0" + minutes; }
-
-    let week_number = getWeekNumber();
-    output += "*Today is " + getDayName(date.getDay()) + " " + date.getDate() + "." + (date.getMonth() + 1) + "." + date.getFullYear() + ". Week " + week_number + ".*\r\n";
-    output += flagday + "\r\n";
-    output += holiday + "\r\n";
-    output += happening + "\r\n";
-    output += weather + "\r\n";
-    output += sunrise + "\r\n\r\n";
-    output += train + "\r\n";
-    output += news;
-
-    bot.telegram.sendMessage(chatId, output, extras).then(() => {
-      debugLog("Send daily morning message.");
-
-      if (date.getDay() == 1 || cmdargs.test) { // 1 == monday
-        giphy_handler.getRandomGif("monday", (gif) => {
-          if (gif != undefined) {
-            bot.telegram.sendDocument(chatId, gif).then(() => {
-              debugLog("Send monday gif.");
-            })
-          }
-        });
-      }
-    });
-
-  });
-}
-
-show_friday_message = (chatId) => {
-  debugLog("setting friday message.");
-  let place = new Object();
-  place.nimi = settings.morning_weather_at;
-  place.countrycode = settings.countrycode;
-
-  let weather = "";
-  let train = "";
-  let news = "";
-
-  async.waterfall([
-    (callback) => {
-      weather_parser.getOpenWeatherData(place, 3, (weather_forecast) => {
-        weather = weather_forecast;
-        callback();
-      });
-    },
-    (callback) => {
-      train_parser.haeJunatReitille(settings.evening_trains_from, settings.evening_trains_to, 5, false, (trains) => {
-        train = trains;
-        callback();
-      });
-    },
-    (callback) => {
-      news_parser.getYleNews(undefined, defaultLang, 5, (news_) => {
-        news = news_;
-        callback();
-      });
-    },
-  ], (err, result) => {
-
-    let output = "*IT'S FRIDAY YAY!" + "*\r\n";
-    output += weather + "\r\n";
-    output += train + "\r\n";
-    output += news;
-
-    bot.telegram.sendMessage(chatId, output, extras).then(() => {
-
-      debugLog("Send friday message.");
-      giphy_handler.getRandomGif("friday", (gif) => {
-
-        if (gif != undefined) {
-          bot.telegram.sendDocument(chatId, gif).then(() => {
-            debugLog("Send friday gif.");
-          })
-        }
-
-      });
-    })
-
-  });
-}
-
-show_weekend_message = (chatId) => {
-  debugLog("setting weekend message.");
-  let place = new Object();
-  place.nimi = settings.weekend_weather_at;
-  place.countrycode = settings.countrycode;
-
-  let weather = "";
-  let news = "";
-  let happening = "";
-  let flagday = "";
-  let holiday = "";
-
-  async.waterfall([
-    (callback) => {
-      weather_parser.getOpenWeatherData(place, 3, (weather_forecast) => {
-        weather = weather_forecast;
-        callback();
-      });
-    },
-    (callback) => {
-      happenings.getHappeningsTodayString((happenings_string) => {
-        happening = happenings_string;
-        callback();
-      });
-    },
-    (callback) => {
-      news_parser.getYleNews(undefined, defaultLang, 5, (news_) => {
-        news = news_;
-        callback();
-      });
-    },
-    (callback) => {
-      holidays.getHolidayToday((holiday_) => {
-        holiday = holiday_;
-        callback();
-      });
-    },
-    (callback) => {
-      flagdays.getFlagdayToday((flagday_) => {
-        flagday = flagday_;
-        callback();
-      });
-    }
-  ], (err, result) => {
-    let output = "*Have a nice weekend!" + "*\r\n";
-    output += flagday + "\r\n";
-    output += holiday + "\r\n";
-    output += happening + "\r\n";
-    output += weather + "\r\n";
-    output += news;
-
-    bot.telegram.sendMessage(chatId, output, extras).then(() => {
-      debugLog("Send weekend message.");
-    })
-  });
-}
-
-show_evening_message = (chatId) => {
-  debugLog("setting daily evening message.");
-  let place = new Object();
-  place.nimi = settings.evening_weather_at;
-  place.countrycode = settings.countrycode;
-
-  let weather = "";
-  let train = "";
-  let happening = "";
-  let movies_tonight = "";
-
-  async.waterfall([
-    (callback) => {
-      weather_parser.getOpenWeatherData(place, 3, (weather_forecast) => {
-        weather = weather_forecast;
-        callback();
-      });
-    },
-    (callback) => {
-      train_parser.haeJunatReitille(settings.evening_trains_from, settings.evening_trains_to, 5, false, (trains) => {
-        train = trains;
-        callback();
-      });
-    },
-    (callback) => {
-      news_parser.getYleNews(undefined, defaultLang, 5, (news_) => {
-        news = news_;
-        callback();
-      });
-    },
-    (callback) => {
-      let useHtmlMarkdown = false;
-      let only_today = true;
-      movies.getMoviesOnTV(useHtmlMarkdown, only_today, (movies_) => {
-        movies_tonight = movies_;
-        callback();
-      })
-    }
-  ], (err, result) => {
-
-    let output = "*Good afternoon!" + "*\r\n";
-    output += weather + "\r\n";
-    output += movies_tonight + "\r\n";
-    output += train + "\r\n";
-    output += news;
-
-    bot.telegram.sendMessage(chatId, output, extras).then(() => {
-      debugLog("Send daily evening message.");
-    })
-
-  });
-}
-
 bytesToSize = (bytes) => {
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
   if (bytes == 0) return '0 Byte';
@@ -455,14 +196,20 @@ getDiskSpace = (path, chatId) => {
 buildMessageWithCommands = () => {
   let output = "";
 
+  if (cmdargs.message) {
+    output += cmdargs.message + "\r\n";
+  }
+
   // first greeting message
   if (cmdargs.morning) {
     output += getRandomMorningGreeting();
   } else if (cmdargs.evening) {
-    output += getEveningMessage();
-  } else if (cmdargs.fridayEvening) {
-    output += getFridayEveningMessage();
-  } else if (cmdargs.weekendMessage) {
+    if (cmdargs.friday) {
+      output += getFridayEveningMessage();
+    } else {
+      output += getEveningMessage();
+    }
+  } else if (cmdargs.weekend) {
     output += getWeekendMessage();
   }
 
@@ -491,30 +238,10 @@ buildMessageWithCommands = () => {
     place.nimi = cmdargs.city;
   }
 
-  /*
-  lat float
-  lon float
-  country string
-  city string
-  
-  weather bool
-  sunrise_sunset bool
-  diskspace bool
-  trains bool
-    trains_from string
-    trains_to string
-    trains_amount int
-  happenings bool
-  holidays bool
-  movies bool
-  flags bool
-  news bool
-  */
-
   if (cmdargs.weather) {
     waterfall_functions.push(
       (callback) => {
-        weather_parser.getOpenWeatherData(place, 3, (weather_forecast) => {
+        weather_parser.getOpenWeatherData(place, 1, (weather_forecast) => {
           output += weather_forecast + "\r\n";
           callback();
         });
@@ -644,35 +371,20 @@ buildMessageWithCommands = () => {
 
     bot.telegram.sendMessage(sendToChatId, output, extras).then(() => {
       debugLog("Send buildMessageWithCommands message.");
+
+      if (cmdargs.giphy) {
+        // send gif after other messages as separate message
+        giphy_handler.getRandomGif(getDayName(new Date().getDate()), (gif) => {
+          if (gif != undefined) {
+            bot.telegram.sendDocument(sendToChatId, gif).then(() => {
+              debugLog("Send monday gif.");
+            })
+          }
+        });
+      }
     });
   });
 
 };
 
-// new command method for building message with multiple commands.
-if (cmdargs.newCommands) {
-  debugLog("building Message With Commands");
-  buildMessageWithCommands();
-} else {
-  // call message functions, depending on arguments
-  if (cmdargs.morning) {
-    debugLog("morning message");
-    show_morning_message(sendToChatId);
-
-  } else if (cmdargs.evening) {
-    debugLog("evening message");
-    show_evening_message(sendToChatId);
-
-  } else if (cmdargs.diskspace) {
-    debugLog("diskspace");
-    getDiskSpace(diskspaceCheckLocation, sendToChatId);
-
-  } else if (cmdargs.friday) {
-    debugLog("FridayMessage");
-    show_friday_message(sendToChatId);
-
-  } else if (cmdargs.weekend) {
-    debugLog("WeekendMessage");
-    show_weekend_message(sendToChatId);
-  }
-}
+buildMessageWithCommands();

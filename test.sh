@@ -1,78 +1,69 @@
 #! /bin/bash
 cd $(dirname "$0")
 
-echo ""
-echo "morning message"
-test="$(node bot_cronjob.js --test -n -m)"
+
+test="$(node bot_cronjob.js --test --message='running tests')"
+sleep 1s
+
 
 echo ""
-echo "evening message"
-test="$(node bot_cronjob.js --test -n -e)"
+echo "morning:"
+test="$(node bot_cronjob.js --test --message='TEST morning:' -m)"
+sleep 1s
 
 echo ""
-echo "friday message"
-test="$(node bot_cronjob.js --test -n -f)"
+echo "evening:"
+test="$(node bot_cronjob.js --test --message='TEST evening:' -e)"
+sleep 1s
 
 echo ""
-echo "weekend message"
-test="$(node bot_cronjob.js --test -n -w)"
+echo "friday evening:"
+test="$(node bot_cronjob.js --test --message='TEST friday evening:' -e -f)"
+sleep 1s
 
 echo ""
-echo "weather"
-test="$(node bot_cronjob.js --test -n -W)"
+echo "weather:"
+test="$(node bot_cronjob.js --test --message='TEST weather:' -W)"
+sleep 1s
 
 echo ""
-echo "weather 2 days"
-test="$(node bot_cronjob.js --test -n -W --w_days 2)"
+echo "sunrise sunset:"
+test="$(node bot_cronjob.js --test --message='TEST sunrise sunset:' -s)"
+sleep 1s
 
 echo ""
-echo "sunrise"
-test="$(node bot_cronjob.js --test -n -s)"
+echo "hours:"
+test="$(node bot_cronjob.js --test --message='TEST hours:' -h)"
+sleep 1s
 
 echo ""
-echo "trains"
-test="$(node bot_cronjob.js --test -n -t)"
+echo "happenings:"
+test="$(node bot_cronjob.js --test --message='TEST happenings:' -H)"
+sleep 1s
 
 echo ""
-echo "happening"
-test="$(node bot_cronjob.js --test -n -h)"
+echo "flagday:"
+test="$(node bot_cronjob.js --test --message='TEST flagday:' -F)"
+sleep 1s
 
 echo ""
-echo "holiday"
-test="$(node bot_cronjob.js --test -n -H)"
+echo "news:"
+test="$(node bot_cronjob.js --test --message='TEST news:' -N)"
+sleep 1s
 
 echo ""
-echo "Movies"
-test="$(node bot_cronjob.js --test -n -M)"
+echo "gif:"
+test="$(node bot_cronjob.js --test --message='TEST gif:' -g)"
+sleep 1s
 
 echo ""
-echo "Flagday"
-test="$(node bot_cronjob.js --test -n -F)"
+echo "lunch week:"
+test="$(node bot_cronjob.js --test --message='TEST lunch week:' --l_week)"
+sleep 1s
 
 echo ""
-echo "News"
-test="$(node bot_cronjob.js --test -n -N)"
+echo "lunch today:"
+test="$(node bot_cronjob.js --test --message='TEST lunch today:' --l_today)"
+sleep 1s
 
-echo ""
-echo "gif"
-test="$(node bot_cronjob.js --test -n -g)"
-
-echo ""
-echo "multiple"
-test="$(node bot_cronjob.js --test -n -eWshHFNMg)"
-
-echo ""
-echo "trains HKI TPE"
-test="$(node bot_cronjob.js --test -n -t --t_from HKI --t_to TPE)"
-
-echo ""
-echo "trains Pasila Lahti 5"
-test="$(node bot_cronjob.js --test -n -t --t_from Pasila --t_to Lahti --t_amount 5)"
-
-echo ""
-echo "trains Lahti Pasila weather at Lahti lat lon"
-test="$(node bot_cronjob.js --test -n -W --w_name Lahti --lat 60.98267 --lon 25.66151)"
-
-echo ""
-echo "trains Lahti Pasila weather at Helsinki lat lon"
-test="$(node bot_cronjob.js --test -n -W --w_name Helsinki --lat 60.192059 --lon 24.945831)"
+test="$(node bot_cronjob.js --test --message='running tests done')"
