@@ -9,7 +9,9 @@
     "foreverbot": "forever start bot_commands.js",
     "forevertestbot": "forever start bot_commands.js --test",
     "stopbot": "forever stop bot_commands.js",
-    "test": "mocha"
+    "test": "mocha",
+    "restartforeverbot": "forever restart bot_commands.js",
+    "restarttestbot": "forever restart bot_commands.js --test"
   },
   "repository": {
     "type": "git",
