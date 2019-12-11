@@ -240,12 +240,11 @@ bot.command(['/home', '/ho', '/work', '/wo'], (ctx) => {
   let text = ctx.update.message.text.split(' ');
   if (text.length == 1) {
     let directionAndUserId = { userId: ctx.update.message.from.id };
-    if (text[0] == '/home') {
+    if (text[0] == '/home' || text[0] == '/ho') {
       directionAndUserId.direction = "home";
     } else {
       directionAndUserId.direction = "work";
     }
-    console.log("directionAndUserId", directionAndUserId);
     train_parser.getTrainsHomeWorkLocation(directionAndUserId, (output) => {
       bot.telegram.sendMessage(chatId, output, extras).then(() => {
         debugLog("Message sent.");
