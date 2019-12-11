@@ -113,6 +113,8 @@ bot.command(['/h', '/help', '/help@' + botName], (ctx) => {
   output += "/rg Get random gif. You can add tag as parameter to narrow results to that tag.\r\n";
   output += "/sun Get sunrise and sunset at Lahti, FI. \r\n";
   output += "/t Train data VR. \r\n";
+  output += "/station To get more information about train-station. \r\n";
+  output += "/set_home /set_work /home /work Try these to set quick route for work-home commuting. \r\n";
   output += "/up To see how long this bot has been running. \r\n";
   output += "/w Weather data from OpenWeatherMap. \r\n";
   output += "You can record voice message and Watson(Microsoft, Azure) tries to recognize it. \r\n";
@@ -195,9 +197,79 @@ bot.command(['/t', '/trains', '/junat'], (ctx) => {
   }
 })
 
-// get train sations
+bot.command(['/set_home', '/set_work'], (ctx) => {
+  debugLog("set_home / set_work command called");
+
+  const chatId = ctx.update.message.chat.id;
+  const extras = { parse_mode: 'Markdown' };
+
+  let text = ctx.update.message.text.split(' ');
+  if (text.length == 2) {
+    let homeWorkLocation = { userId: ctx.update.message.from.id };
+    if (text[0] == '/set_home') {
+      homeWorkLocation.home = text[1];
+    } else {
+      homeWorkLocation.work = text[1];
+    }
+    train_parser.addHomeWorkLocation(homeWorkLocation, (output) => {
+      bot.telegram.sendMessage(chatId, output, extras).then(() => {
+        debugLog("Message sent.");
+      })
+    })
+  } else {
+    let output = "You can set home and work location for quick route by: \r\n"
+      + "/set_home <station name>\r\n"
+      + "/set_work <station name>\r\n"
+      + "You can try searching station by /station <city name>\r\n"
+      + "Then you can use quick commands for trains on that route:\r\n"
+      + "/ho /home returns next 10 trains from work to home.\r\n"
+      + "/wo /work returns next 10 trains from home to work.\r\n";
+
+    bot.telegram.sendMessage(chatId, output, extras).then(() => {
+      debugLog("Message sent.");
+    })
+  }
+})
+
+bot.command(['/home', '/ho', '/work', '/wo'], (ctx) => {
+  debugLog("/work or /home command called");
+
+  const chatId = ctx.update.message.chat.id;
+  const extras = { parse_mode: 'Markdown' };
+
+  let text = ctx.update.message.text.split(' ');
+  if (text.length == 1) {
+    let directionAndUserId = { userId: ctx.update.message.from.id };
+    if (text[0] == '/home') {
+      directionAndUserId.direction = "home";
+    } else {
+      directionAndUserId.direction = "work";
+    }
+    console.log("directionAndUserId", directionAndUserId);
+    train_parser.getTrainsHomeWorkLocation(directionAndUserId, (output) => {
+      bot.telegram.sendMessage(chatId, output, extras).then(() => {
+        debugLog("Message sent.");
+      })
+    })
+  } else {
+    let output = "You can set home and work location for quick route by: \r\n"
+      + "/set_home <station name>\r\n"
+      + "/set_work <station name>\r\n"
+      + "You can try searching station by /station <city name>\r\n"
+      + "Then you can use quick commands for trains on that route:\r\n"
+      + "/ho /home returns next 10 trains from work to home.\r\n"
+      + "/wo /work returns next 10 trains from home to work.\r\n";
+
+    bot.telegram.sendMessage(chatId, output, extras).then(() => {
+      debugLog("Message sent.");
+    })
+  }
+})
+
+
+// get train stations
 bot.command(['/st', '/station'], (ctx) => {
-  debugLog("trains command called");
+  debugLog("station command called");
   let text = ctx.update.message.text.split(' ');
   if (text.length == 2) {
     let station_name = text[1];
@@ -210,7 +282,7 @@ bot.command(['/st', '/station'], (ctx) => {
       })
     });
   } else {
-    ct.reply("Give station name after /station for example: /station Pasila");
+    ctx.reply("Give station name after /station for example: /station Pasila");
   }
 })
 

@@ -23,6 +23,21 @@ exports.loadFile = (path, flag, callback) => {
   });
 }
 
+exports.loadJson = (path, callback) => {
+  fs.readFile(path, 'utf8', (err, data) => {
+    if (err) throw err;
+    data = JSON.parse(data);
+    callback(data);
+  });
+}
+
+exports.writeToJson = (path, data) => {
+  fs.writeFile(path, JSON.stringify(data), 'utf8', (err) => {
+    if (err) throw err;
+    console.log('The file "' + path + '" has been saved!');
+  });
+}
+
 // append to end of file
 exports.appendToFile = (text, path) => {
   fs.appendFile(path, text, function (err) {

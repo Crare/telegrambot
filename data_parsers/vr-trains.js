@@ -3,6 +3,7 @@
 // TODO: rename these functions in english and cleanup.
 
 const https = require('https');
+const helper = require('./helper.js');
 
 let asemat = [];
 
@@ -14,6 +15,17 @@ const e_snail = '\u{1f40c}';
 const e_warning = '\u{26a0}';
 const e_no_entry = '\u{26D4}';
 const e_cross_mark = '\u{274C}';
+
+let homeWorkLocations = {};
+
+loadHomeWorkLocations = () => {
+  helper.loadJson('./data/workHomeStations.json', (data) => {
+    homeWorkLocations = data;
+    console.log("loaded homeWorkLocations: ", homeWorkLocations);
+  })
+}
+loadHomeWorkLocations();
+
 
 capitalize = (word) => {
   return word.charAt(0).toUpperCase() + word.slice(1);
@@ -366,7 +378,10 @@ exports.haeAsemanJunat = (start, haeCargoJunat, trainAmount, callBack) => {
 }
 
 exports.haeJunatReitille = (start, end, trainAmount, haeCargoJunat, callBack) => {
+  haeJunatReitille2(start, end, trainAmount, haeCargoJunat, (response) => callBack(response));
+}
 
+haeJunatReitille2 = (start, end, trainAmount, haeCargoJunat, callBack) => {
   haeAsemat(function callb(response_asemat) {
     asemat = response_asemat;
     const lahto = luoAsema(start);
@@ -418,6 +433,48 @@ exports.haeJunatReitille = (start, end, trainAmount, haeCargoJunat, callBack) =>
       callBack(output);
     }
   });
+}
 
 
+exports.addHomeWorkLocation = (homeWorkLocation, callback) => {
+  if (!homeWorkLocation.userId) {
+    callback("userId not found");
+  } else {
+    if (!homeWorkLocations[homeWorkLocation.userId]) {
+      homeWorkLocations[homeWorkLocation.userId] = {};
+    }
+    if (homeWorkLocation.work) {
+      homeWorkLocations[homeWorkLocation.userId].work = homeWorkLocation.work;
+      helper.writeToJson('./data/workHomeStations.json', homeWorkLocations);
+      callback("Set work location to " + homeWorkLocation.work);
+
+    } else if (homeWorkLocation.home) {
+      homeWorkLocations[homeWorkLocation.userId].home = homeWorkLocation.home;
+      helper.writeToJson('./data/workHomeStations.json', homeWorkLocations);
+      callback("Set home location to " + homeWorkLocation.home);
+
+    } else {
+      callback("no work or home given!");
+    }
+  }
+}
+
+exports.getTrainsHomeWorkLocation = (directionAndUserId, callback) => {
+  if (!directionAndUserId.direction) {
+    callback("direction not given!");
+  } else if (!directionAndUserId.userId) {
+    callback("userId not given!");
+  } else if (!homeWorkLocations[directionAndUserId.userId]) {
+    callback("No work and/or home stations setup for user! Try commands /set_home and /set_work");
+  } else {
+    if (directionAndUserId.direction == "work") {
+      haeJunatReitille2(homeWorkLocations[directionAndUserId.userId].work, homeWorkLocations[directionAndUserId.userId].home, 10, false, (response) => {
+        callback(response);
+      })
+    } else {
+      haeJunatReitille2(homeWorkLocations[directionAndUserId.userId].work, homeWorkLocations[directionAndUserId.userId].home, 10, false, (response) => {
+        callback(response);
+      })
+    }
+  }
 }
