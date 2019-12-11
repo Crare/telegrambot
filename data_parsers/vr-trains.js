@@ -468,7 +468,7 @@ exports.getTrainsHomeWorkLocation = (directionAndUserId, callback) => {
     callback("No work and/or home stations setup for user! Try commands /set_home and /set_work");
   } else {
     if (directionAndUserId.direction == "work") {
-      haeJunatReitille2(homeWorkLocations[directionAndUserId.userId].work, homeWorkLocations[directionAndUserId.userId].home, 10, false, (response) => {
+      haeJunatReitille2(homeWorkLocations[directionAndUserId.userId].home, homeWorkLocations[directionAndUserId.userId].work, 10, false, (response) => {
         callback(response);
       })
     } else {
