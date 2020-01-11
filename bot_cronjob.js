@@ -7,7 +7,6 @@ const async = require('async');
 * train-data from https://rata.digitraffic.fi/api/v1/doc/index.html
 * weather-data from https://openweathermap.org/api
 * news-data from https://yle.fi/uutiset/rss
-* happenings from http://www.webcal.fi/fi-FI/kalenterit.php
 */
 
 /*
@@ -30,11 +29,9 @@ const cmdargs = require('commander');
 
 const train_parser = require('./data_parsers/vr-trains.js');
 const weather_parser = require('./data_parsers/weather.js');
-const news_parser = require('./data_parsers/news2.js');
+const news_parser = require('./data_parsers/news3.js');
 const sunrise_sunset = require('./data_parsers/sunrise-sunset.js');
-const happenings = require('./data_parsers/happenings.js');
 const flagdays = require('./data_parsers/flagdays.js');
-const holidays = require('./data_parsers/holidays.js');
 const movies = require('./data_parsers/movies.js');
 const lunch_menu = require('./data_parsers/lunch_menu.js');
 
@@ -75,8 +72,6 @@ cmdargs
   .option('--trains_from [station_name]', 'Station for departing.')
   .option('--trains_to [station_name]', 'Station for arrival.')
   .option('--trains_amount <n>', 'Amount of train-schedules shown.', parseInt)
-  .option('-h, --happenings', 'Show happenings for today.')
-  .option('-H, --holidays', 'Show special holiday if today is holiday.')
   .option('-M, --movies', 'Show todays movies.')
   .option('-F, --flags', 'Show flagday information if today is flagday.')
   .option('-N, --news', 'Show news for today.')
@@ -108,7 +103,7 @@ const bot = new Telegraf(botToken)
 const extras = { parse_mode: 'Markdown' };
 
 // Default language for news if not given. Possible languages are: en, fi, ru, sa, simplefi
-const defaultLang = "en";
+const defaultLang = settings.newsDefaultLanguage;
 
 getDayName = (index) => {
   const daynames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -171,7 +166,7 @@ buildMessageWithCommands = () => {
 
   // setup place
   let place = {
-    nimi: settings.morning_weather_at,
+    name: settings.sun_place_name,
     countrycode: settings.countrycode,
     lat: settings.sun_at_lat,
     lng: settings.sun_at_lon,
@@ -228,28 +223,6 @@ buildMessageWithCommands = () => {
         }
       );
     }
-  }
-
-  if (cmdargs.happenings) {
-    waterfall_functions.push(
-      (callback) => {
-        happenings.getHappeningsTodayString((happenings_string) => {
-          output += happenings_string + "\r\n";
-          callback();
-        });
-      }
-    );
-  }
-
-  if (cmdargs.holidays) {
-    waterfall_functions.push(
-      (callback) => {
-        holidays.getHolidayToday((holiday) => {
-          output += holiday + "\r\n";
-          callback();
-        });
-      }
-    );
   }
 
   if (cmdargs.movies) {

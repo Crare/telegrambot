@@ -5,7 +5,6 @@
 * train-data from https://rata.digitraffic.fi/api/v1/doc/index.html
 * weather-data from https://openweathermap.org/api
 * news-data from https://yle.fi/uutiset/rss
-* happenings from http://www.webcal.fi/fi-FI/kalenterit.php
 */
 
 const startTime = new Date();
@@ -25,7 +24,6 @@ const reminder = require('./data_parsers/reminder.js');
 const sunrise_sunset = require('./data_parsers/sunrise-sunset.js');
 const movies = require('./data_parsers/movies.js');
 const flagdays = require('./data_parsers/flagdays.js');
-const holidays = require('./data_parsers/holidays.js');
 const ruuvi = require('./data_parsers/ruuvi.js');
 
 // commands
@@ -106,7 +104,7 @@ bot.command(['/h', '/help', '/help@' + botName], (ctx) => {
   output += "/p Get provinces for news areas. \r\n";
   output += "/re Set a reminder to your future self!\r\n";
   output += "/res Check how many active reminders there are.\r\n";
-  output += "/sun Get sunrise and sunset at Lahti, FI. \r\n";
+  output += "/sun Get sunrise and sunset.\r\n";
   output += "/t Train data VR. \r\n";
   output += "/station To get more information about train-station. \r\n";
   output += "/set_home /set_work /home /work Try these to set quick route for work-home commuting. \r\n";
@@ -142,7 +140,7 @@ bot.command(['/sunrise', '/sunset', '/dusk', '/dawn', '/sun'], (ctx) => {
   debugLog("sun command called");
   place = { name: settings.sun_place_name, countrycode: settings.countrycode, lat: settings.sun_at_lat, lng: settings.sun_at_lon };
   sunrise_sunset.getSunDataAtLocation(place, (sun_data) => {
-    let output = "<b>Dusk till dawn at Lahti, Finland:</b> \r\n";
+    let output = "<b>Dusk till dawn at " + place.name + ":</b> \r\n";
     output += sun_data;
     const chatId = ctx.update.message.chat.id;
     const extras = { parse_mode: 'Html' };
@@ -329,7 +327,7 @@ bot.command(['/p', '/provinces'], (ctx) => {
 bot.command(['/n', '/news', '/uutiset'], (ctx) => {
   debugLog("news command called");
   let text = ctx.update.message.text.split(' ');
-  if (text.length == 1 || text.length >= 4) {
+  if (settings.newsDefaultLanguage == "" || text.length == 1 || text.length >= 4) {
     news_parser.getHelpMessage((output) => {
       const chatId = ctx.update.message.chat.id;
       const extras = { parse_mode: 'Markdown' };
@@ -478,14 +476,6 @@ bot.command(['/chatId', '/id'], (ctx) => {
 bot.command(['/flag', '/flagday'], (ctx) => {
   debugLog("flagday command called.");
   flagdays.getFlagdayToday((output) => {
-    ctx.reply(output);
-  });
-});
-
-// get holiday today
-bot.command(['/hday', '/holiday'], (ctx) => {
-  debugLog("holiday command called.");
-  holidays.getHolidayToday((output) => {
     ctx.reply(output);
   });
 });

@@ -125,6 +125,7 @@ exports.getHelpMessage = (callback) => {
   output += "For example: '/n fi päijät-häme' return news-data for Päijät-Häme in Finnish.\r\n";
   output += "You can also use shortcodes for provinces. Päijät-Häme = PH. \r\n";
   output += "To get list of provinces in Finland try: /p or /provinces \r\n";
+  output += "You can also setup default news language in settings.json \r\n";
   callback(output);
 }
 
