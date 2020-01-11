@@ -96,20 +96,20 @@ lastDay = (y, m) => {
 // HELP
 bot.command(['/h', '/help', '/help@' + botName], (ctx) => {
   let output = "<b>Available commands:</b>\r\n";
-  output += "/chatId to get current chat's id.";
+  output += "/chatId to get current chat's id.\r\n";
   output += "/f Flip a coin: output heads or tails.\r\n";
-  output += "/h or /help Get this help message. \r\n";
+  output += "/h or /help Get this help message.\r\n";
   output += "/movies get movies coming up in TV.\r\n";
-  output += "/n News data from YLE. \r\n";
-  output += "/p Get provinces for news areas. \r\n";
+  output += "/n News data from YLE.\r\n";
+  output += "/p Get provinces for news areas.\r\n";
   output += "/re Set a reminder to your future self!\r\n";
   output += "/res Check how many active reminders there are.\r\n";
   output += "/sun Get sunrise and sunset.\r\n";
-  output += "/t Train data VR. \r\n";
-  output += "/station To get more information about train-station. \r\n";
-  output += "/set_home /set_work /home /work Try these to set quick route for work-home commuting. \r\n";
-  output += "/up To see how long this bot has been running. \r\n";
-  output += "/w Weather data from OpenWeatherMap. \r\n";
+  output += "/t Train data VR.\r\n";
+  output += "/station To get more information about train-station.\r\n";
+  output += "/set_home /set_work /home /work Try these to set quick route for work-home commuting.\r\n";
+  output += "/up To see how long this bot has been running.\r\n";
+  output += "/w Weather data from OpenWeatherMap.\r\n";
   output += "This bot can also be setup to send daily messages, checkout the readme.\r\n";
   output += "More information can be found by writing command without parameters after it.\r\n";
 
