@@ -10,11 +10,11 @@ then
 	echo "bot is running."
 else
 	echo "bot is not running, starting.."
-	if [ "$1" == "test" ]
+	if [ "$1" == "production" ]
 	then
-		echo "running test bot"
+		echo "running production bot"
 		# forever start bot_commands.js
-		npm run forevertestbot
+		npm run foreverproductionbot
 	else
 		# forever start bot_commands.js --test
 		npm run foreverbot
