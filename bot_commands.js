@@ -127,9 +127,13 @@ bot.command(['/uptime', '/up'], (ctx) => {
   let now = new Date();
   let uptime = now.getTime() - startTime.getTime();
   debugLog("uptime is " + uptime + " ms.");
-  let output = "I've been running since " + startTime.getHours() + ":" + startTime.getMinutes() + " " + startTime.getDate() + "." + (startTime.getMonth() + 1) + "." + startTime.getFullYear() + "\r\n";
-  output += "Uptime is " + uptime + " ms.\r\n";
-  output += "= " + msToHumanReadable(uptime);
+  let output = "I've been running since " +
+    ('0' + startTime.getHours()).substr(-2)
+    + ":" + ('0' + startTime.getMinutes()).substr(-2)
+    + " " + startTime.getDate()
+    + "." + (startTime.getMonth() + 1)
+    + "." + startTime.getFullYear() + "\r\n";
+  output += "Uptime is " + msToHumanReadable(uptime);
   ctx.reply(output);
 });
 
