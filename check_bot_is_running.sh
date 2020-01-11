@@ -16,7 +16,7 @@ else
 		# forever start bot_commands.js
 		npm run foreverproductionbot
 	else
-		# forever start bot_commands.js --test
+		# forever start bot_commands.js
 		npm run foreverbot
 	fi
 	echo "done! Bot is running now!"
