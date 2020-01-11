@@ -106,7 +106,7 @@ You need to install forever npm package globally:
 
 You need to run bot_cronjob.js from crontab.
 
-Example: open crontab in console
+Example: open crontab in console, check the crontab_template.txt for example.
 
 crontab -e
 
