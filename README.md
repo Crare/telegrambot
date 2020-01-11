@@ -100,6 +100,10 @@ listing of running forever-scipts:
 
 ## cronjob for daily messages:
 
+You need to install forever npm package globally:
+
+    npm install -g forever
+
 You need to run bot_cronjob.js from crontab.
 
 Example: open crontab in console
