@@ -17,14 +17,10 @@ const settings = require('./settings.json');
 // get required modules.
 const Telegraf = require('telegraf');
 let cmdargs = require('commander');
-const diskspace = require('diskspace');
-const diskspace_path = "/var/www/html/";
 
 const train_parser = require('./data_parsers/vr-trains.js');
 const weather_parser = require('./data_parsers/weather.js');
 const news_parser = require('./data_parsers/news3.js');
-// const voice_recognition = require('./data_parsers/voice_recognition.js');
-const giphy_handler = require('./data_parsers/giphy.js');
 const reminder = require('./data_parsers/reminder.js');
 const sunrise_sunset = require('./data_parsers/sunrise-sunset.js');
 const movies = require('./data_parsers/movies.js');
@@ -35,27 +31,33 @@ const ruuvi = require('./data_parsers/ruuvi.js');
 // commands
 cmdargs
   .version('0.0.1')
-  .option('-t, --test', 'Start running test version of the bot.')
+  .option('-p, --production', 'Start running bot in production version of the bot.')
   .option('-d, --debug', 'Debug, show console log')
   .parse(process.argv);
 
-// setup bot
-let sendToChatId = settings.productionChatId;
-let botName = settings.botName;
-
 const debug = cmdargs.debug ? true : false;
-if (cmdargs.test) {
-  botToken = settings.test_bot_key;
-  sendToChatId = settings.testChatId;
-  botName = settings.testBotName;
+debugLog = (output) => {
+  if (debug) {
+    console.log(output);
+  }
+}
+
+// setup bot
+let botToken = settings.test_bot_key;
+let sendToChatId = settings.testChatId;
+let botName = settings.testBotName;
+if (cmdargs.production) {
+  botToken = settings.prod_bot_key;
+  sendToChatId = settings.productionChatId;
+  botName = settings.botName;
 }
 const bot = new Telegraf(botToken)
 
 // storing reminders.
 let reminders = [];
-let reminders_store_path = "./data/reminders.json";
-if (cmdargs.test) {
-  reminders_store_path = "./data/reminders_test.json";
+let reminders_store_path = "./data/reminders_test.json";
+if (cmdargs.production) {
+  reminders_store_path = "./data/reminders.json";
 }
 //emojis
 const e_train = '\u{1f686}';
@@ -63,11 +65,6 @@ const e_train2 = '\u{1F682}';
 
 const extras_ = { parse_mode: 'Html' };
 
-debugLog = (output) => {
-  if (debug) {
-    console.log(output);
-  }
-}
 
 // milliseconds to more human readable format
 msToHumanReadable = (ms) => {
@@ -101,24 +98,21 @@ lastDay = (y, m) => {
 // HELP
 bot.command(['/h', '/help', '/help@' + botName], (ctx) => {
   let output = "<b>Available commands:</b>\r\n";
-  output += "/ds Check diskspace at " + diskspace_path + "\r\n";
+  output += "/chatId to get current chat's id.";
   output += "/f Flip a coin: output heads or tails.\r\n";
-  output += "/gif Get gifs! \r\n";
-  output += "/h Get this help message. \r\n";
+  output += "/h or /help Get this help message. \r\n";
   output += "/movies get movies coming up in TV.\r\n";
   output += "/n News data from YLE. \r\n";
   output += "/p Get provinces for news areas. \r\n";
   output += "/re Set a reminder to your future self!\r\n";
   output += "/res Check how many active reminders there are.\r\n";
-  output += "/rg Get random gif. You can add tag as parameter to narrow results to that tag.\r\n";
   output += "/sun Get sunrise and sunset at Lahti, FI. \r\n";
   output += "/t Train data VR. \r\n";
   output += "/station To get more information about train-station. \r\n";
   output += "/set_home /set_work /home /work Try these to set quick route for work-home commuting. \r\n";
   output += "/up To see how long this bot has been running. \r\n";
   output += "/w Weather data from OpenWeatherMap. \r\n";
-  output += "You can record voice message and Watson(Microsoft, Azure) tries to recognize it. \r\n";
-  output += "This bot also sends daily messages about news-, train- and weather- data in mornings(at 7am mon-fri, 9am weekends) and afternoon(15:45 mon-fri)\r\n";
+  output += "This bot can also be setup to send daily messages, checkout the readme.\r\n";
   output += "More information can be found by writing command without parameters after it.\r\n";
 
   const chatId = ctx.update.message.chat.id;
@@ -385,96 +379,6 @@ bot.command(['/test'], (ctx) => {
   })
 })
 
-// VOICE MESSAGE, telegram bot sees voice-message in chat
-// bot.on('voice', (ctx) => {
-//   debugLog("voice message found");
-//   let username = ctx.message.from.username;
-//   debugLog("Got voice message from @" + username);
-//   debugLog("Loading the audio file...");
-
-//   voice_recognition.getFile(ctx.message.voice.file_id, (localpath) => {
-
-//     debugLog("File loaded. sending the audio to Watson...");
-//     debugLog("localpath: " + localpath);
-//     voice_recognition.speechToText(localpath, (result) => {
-
-//       debugLog("Watson found keywords: ");
-//       debugLog(result.keywords);
-//       debugLog("Watson returned the message:");
-//       debugLog(result.text + "\n");
-
-//       if (result.text != undefined) {
-//         ctx.reply("Watson thinks @" + username + " said: " + result.text);
-//       } else {
-//         ctx.reply("Couldn't get Watson results, please try again.");
-//       }
-//     });
-//   });
-// });
-
-// get gifs
-bot.command(['/gif'], (ctx) => {
-  debugLog("gif command called");
-  const chatId = ctx.update.message.chat.id;
-  let text = ctx.update.message.text.split(' ');
-
-  if (text.length == 2) {
-
-    let query = text[1];
-    let amount = 1;
-
-    giphy_handler.getGifs(query, amount, (gif_urls) => {
-      for (let i = 0; i < gif_urls.length; i++) {
-        let photo = gif_urls[i];
-        bot.telegram.sendDocument(chatId, photo).then(() => {
-          debugLog("Message sent.");
-        })
-      }
-    })
-  } else if (text.length == 3) {
-
-    let query = text[1];
-    let amount = text[2];
-
-    giphy_handler.getGifs(query, amount, (gif_urls) => {
-      for (let i = 0; i < gif_urls.length; i++) {
-        let photo = gif_urls[i];
-        if (photo == undefined) {
-          debugLog("undefined photo url!");
-        } else {
-          bot.telegram.sendDocument(chatId, photo).then(() => {
-            debugLog("Message sent.");
-          })
-        }
-      }
-      if (gif_urls.length < amount) {
-        ctx.reply("Didn't find " + (amount - gif_urls.length) + "/" + amount + " gifs, sorry!");
-      }
-    })
-  } else {
-    ctx.reply("Give parameter as searchword for gifs. example: '/gif cats' or '/gif dogs 3' if you want multiple just add number at the end(limit 10).");
-  }
-});
-
-
-// get random gifs
-bot.command(['/randomgif', '/rg'], (ctx) => {
-  debugLog("random gif command called");
-  const chatId = ctx.update.message.chat.id;
-  let text = ctx.update.message.text.split(' ');
-  let tag = undefined;
-  if (text.length == 2) {
-    tag = text[1];
-  }
-  giphy_handler.getRandomGif(tag, (gif) => {
-    if (gif != undefined) {
-      bot.telegram.sendDocument(chatId, gif).then(() => {
-        debugLog("Message sent.");
-      })
-    }
-  });
-});
-
 // load reminders
 reminder.loadRemindersJSON(reminders_store_path, (reminders_array) => {
   reminders = reminders_array;
@@ -546,52 +450,6 @@ bot.command(['/reminders', '/res'], (ctx) => {
   })
 });
 
-// removes keyboard. (because messing around is fun, and then you have to clean it up.)
-/*bot.command(['/removeKeyboard'], (ctx) => {
- const chatId = ctx.update.message.chat.id;
-    const extras = {reply_markup: {remove_keyboard: true}};
-    let output = 'Removed keyboard!';
-    bot.telegram.sendMessage(chatId, output, extras).then(() => {
-     debugLog("Message sent. Keyboard removed.");
-   })
-});*/
-
-bytesToSize = (bytes) => {
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-  if (bytes == 0) return '0 Byte';
-  const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-  return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
-};
-
-bot.command(['/space', '/disk', '/diskspace', '/ds'], (ctx) => {
-  let chatId = ctx.update.message.chat.id;
-  diskspace.check(diskspace_path, (err, result) => {
-    let output = "*Diskspace at* " + diskspace_path + "\r\n";
-    output += "*Total:* " + bytesToSize(result.total) + " 100% \r\n";
-    output += "*Used:* " + bytesToSize(result.used) + " " + ((result.used / result.total) * 100).toFixed(2) + "% " + "\r\n";
-    output += "*Free:*  " + bytesToSize(result.free) + " " + ((result.free / result.total) * 100).toFixed(2) + "% " + "\r\n";
-    output += "*Status:* " + result.status + "\r\n";
-
-    const extras = { parse_mode: 'Markdown' };
-    bot.telegram.sendMessage(chatId, output, extras).then(() => {
-      debugLog("Send diskspace message.");
-    })
-  });
-})
-
-
-
-// Get movies on TV 2
-bot.command(['/movies2', '/films2'], (ctx) => {
-  debugLog("get movies2 called");
-  let chatId = ctx.update.message.chat.id;
-  movies.getAmpparitMoviesOnTV((output) => {
-    bot.telegram.sendMessage(chatId, output, extras_).then(() => {
-      debugLog("Movies message sent.");
-    })
-  })
-})
-
 // Get movies on TV
 bot.command(['/movies', '/films'], (ctx) => {
   debugLog("get movies called");
@@ -654,8 +512,12 @@ bot.catch((err) => {
 debugLog("bot running!");
 bot.startPolling()
 
-// send message chat that the bot is running.
-const start_message = "bot started running!";
-bot.telegram.sendMessage(sendToChatId, start_message, extras_).then(() => {
-  debugLog("Message sent.");
-})
+if (sendToChatId && sendToChatId != "") {
+  // send message chat that the bot is running.
+  const start_message = "Bot started running! Check command /help for commands and more information.";
+  bot.telegram.sendMessage(sendToChatId, start_message, extras_).then(() => {
+    debugLog("Message sent.");
+  })
+} else {
+  console.log("No ChatId setup. Please send command /chatId to the bot and save the id to the settings.json.");
+}

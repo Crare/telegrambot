@@ -13,7 +13,7 @@ const async = require('async');
 /*
 * DEBUG RUN:
 * in commandline:
-* node bot_cronjob.js --test --morning
+* node bot_cronjob.js --morning
 * THIS CODE IS RUN IN CRONTAB. telegram commands are in bot_commands.js
 */
 
@@ -24,15 +24,13 @@ const Telegraf = require('telegraf')
 // save your settings in 'settings_template.json'
 // and change the name it as 'settings.json'.
 const settings = require('./settings.json');
-morning_greetings = require('./data/morning_greetings.json');
+morning_in_many_languages = require('./data/good_morning_in_many_languages.json');
 
 const cmdargs = require('commander');
-const diskspace = require('diskspace');
 
 const train_parser = require('./data_parsers/vr-trains.js');
 const weather_parser = require('./data_parsers/weather.js');
 const news_parser = require('./data_parsers/news2.js');
-const giphy_handler = require('./data_parsers/giphy.js');
 const sunrise_sunset = require('./data_parsers/sunrise-sunset.js');
 const happenings = require('./data_parsers/happenings.js');
 const flagdays = require('./data_parsers/flagdays.js');
@@ -43,38 +41,36 @@ const lunch_menu = require('./data_parsers/lunch_menu.js');
 // crontab examples:
 
 // morning
-// node bot_cronjob.js --test -m -WshHFNg
+// node bot_cronjob.js -m -WshHFNg
 
 // evening
-// node bot_cronjob.js --test -e -WM
+// node bot_cronjob.js -e -WM
 
 // friday evening
-// node bot_cronjob.js --test -e -f -WMg
+// node bot_cronjob.js -e -f -WMg
 
 // weekend
-// node bot_cronjob.js --test -w -WshHFNM
+// node bot_cronjob.js -w -WshHFNM
 
 // lunch menu for week
-// node bot_cronjob.js --test --l_week
+// node bot_cronjob.js --l_week
 
 // lunch menu for today
-// node bot_cronjob.js --test --l_today
+// node bot_cronjob.js --l_today
 
 // commands
 cmdargs
   .version('0.0.1')
-  .option('--test', 'send messages to test bot instead of production bot.')
+  .option('--production', 'send messages to production bot instead of test bot.')
   .option('-m, --morning', 'Show morning message')
   .option('-e, --evening', 'Show evening message')
   .option('-f, --friday', 'Show friday message')
   .option('-w, --weekend', 'Show weekend message')
-  .option('-d, --diskspace', 'Displays diskspace at /var/www/html/ used,total,free space.')
 
   .option('-W, --weather', 'Show weather forecast.')
   .option('--lat <n>', 'Latitude coordinate for weather. (otherwise uses settings.lat)', parseFloat)
   .option('--lon <n>', 'Longitude coordinate for weather. (otherwise uses settings.lon)', parseFloat)
   .option('-s, --sunrise_sunset', 'Show sunrise and sunset time.')
-  .option('--diskspace [path]', 'Show diskspace at path.')
   .option('-t, --trains', 'Show train schedules.')
   .option('--trains_from [station_name]', 'Station for departing.')
   .option('--trains_to [station_name]', 'Station for arrival.')
@@ -86,36 +82,30 @@ cmdargs
   .option('-N, --news', 'Show news for today.')
   .option('--l_week', 'Show lunch menu for this week.')
   .option('--l_today', 'Show lunch menu for today.')
-  .option('-g, --giphy', 'Show gifs from giphy.')
 
   .option('--message <s>', 'Sends message')
 
   .parse(process.argv);
 
-// setup bot
-let botToken = settings.prod_bot_key;
-let sendToChatId = settings.productionChatId;
-let botName = settings.botName;
-
 const debug = cmdargs.debug ? true : false;
-
-if (cmdargs.test) {
-  botToken = settings.test_bot_key;
-  sendToChatId = settings.testChatId;
-  botName = settings.testBotName;
-}
-
-const bot = new Telegraf(botToken)
-
 debugLog = (output) => {
   if (debug) {
     console.log(output);
   }
 }
 
-const extras = { parse_mode: 'Markdown' };
+// setup bot
+let botToken = settings.test_bot_key;
+let sendToChatId = settings.testChatId;
+let botName = settings.testBotName;
+if (cmdargs.production) {
+  botToken = settings.prod_bot_key;
+  sendToChatId = settings.productionChatId;
+  botName = settings.botName;
+}
+const bot = new Telegraf(botToken)
 
-const diskspaceCheckLocation = "/var/www/html/";
+const extras = { parse_mode: 'Markdown' };
 
 // Default language for news if not given. Possible languages are: en, fi, ru, sa, simplefi
 const defaultLang = "en";
@@ -142,8 +132,8 @@ getEveningMessage = () => {
 }
 
 getRandomMorningGreeting = () => {
-  let rand_i = Math.floor(Math.random() * morning_greetings.length);
-  let output = morning_greetings[rand_i] + "\r\n";
+  let rand_i = Math.floor(Math.random() * morning_in_many_languages.length);
+  let output = morning_in_many_languages[rand_i].word + " (" + morning_in_many_languages[rand_i].language + ")" + "\r\n";
   return output;
 }
 
@@ -153,44 +143,6 @@ getFridayEveningMessage = () => {
 
 getWeekendMessage = () => {
   return "*Have a nice weekend!" + "*\r\n";
-}
-
-bytesToSize = (bytes) => {
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-  if (bytes == 0) return '0 Byte';
-  const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-  return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
-};
-
-getDiskSpaceMessage = (path, callback) => {
-  let output = "";
-  diskspace.check(path, (err, result) => {
-    if (err) {
-      callback("Couldn't get diskspace at path: " + path);
-    } else {
-      output += "*Diskspace at* " + path + "\r\n";
-      output += "*Total:* " + bytesToSize(result.total) + " 100% \r\n";
-      output += "*Used:* " + bytesToSize(result.used) + " " + ((result.used / result.total) * 100).toFixed(2) + "% " + "\r\n";
-      output += "*Free:*  " + bytesToSize(result.free) + " " + ((result.free / result.total) * 100).toFixed(2) + "% " + "\r\n";
-      output += "*Status:* " + result.status + "\r\n";
-      callback(output);
-    }
-  });
-}
-
-getDiskSpace = (path, chatId) => {
-  diskspace.check(path, (err, result) => {
-    let output = "*Hello this is diskspace information:*\r\n";
-    output += "*Diskspace at* " + path + "\r\n";
-    output += "*Total:* " + bytesToSize(result.total) + " 100% \r\n";
-    output += "*Used:* " + bytesToSize(result.used) + " " + ((result.used / result.total) * 100).toFixed(2) + "% " + "\r\n";
-    output += "*Free:*  " + bytesToSize(result.free) + " " + ((result.free / result.total) * 100).toFixed(2) + "% " + "\r\n";
-    output += "*Status:* " + result.status + "\r\n";
-
-    bot.telegram.sendMessage(chatId, output, extras).then(() => {
-      debugLog("Send diskspace message.");
-    })
-  });
 }
 
 buildMessageWithCommands = () => {
@@ -256,16 +208,6 @@ buildMessageWithCommands = () => {
           output += sun_data + "\r\n";
           callback();
         });
-      }
-    );
-  }
-
-  if (cmdargs.diskspace) {
-    waterfall_functions.push(
-      (callback) => {
-        getDiskSpaceMessage(path, (message) => {
-          output += message + "\r\n";
-        })
       }
     );
   }
@@ -371,17 +313,6 @@ buildMessageWithCommands = () => {
 
     bot.telegram.sendMessage(sendToChatId, output, extras).then(() => {
       debugLog("Send buildMessageWithCommands message.");
-
-      if (cmdargs.giphy) {
-        // send gif after other messages as separate message
-        giphy_handler.getRandomGif(getDayName(new Date().getDate()), (gif) => {
-          if (gif != undefined) {
-            bot.telegram.sendDocument(sendToChatId, gif).then(() => {
-              debugLog("Send monday gif.");
-            })
-          }
-        });
-      }
     });
   });
 

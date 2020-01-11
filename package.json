@@ -5,13 +5,13 @@
   "main": "bot_commands.js",
   "scripts": {
     "start": "node bot_commands.js",
-    "testbot": "node bot_commands.js --test",
+    "productionbot": "node bot_commands.js --production",
     "foreverbot": "forever start bot_commands.js",
-    "forevertestbot": "forever start bot_commands.js --test",
+    "foreverproductionbot": "forever start bot_commands.js --production",
     "stopbot": "forever stop bot_commands.js",
     "test": "mocha",
     "restartforeverbot": "forever restart bot_commands.js",
-    "restarttestbot": "forever restart bot_commands.js --test"
+    "restartproductionbot": "forever restart bot_commands.js --production"
   },
   "repository": {
     "type": "git",
