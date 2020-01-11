@@ -467,7 +467,7 @@ exports.getTrainsHomeWorkLocation = (directionAndUserId, callback) => {
   } else if (!homeWorkLocations[directionAndUserId.userId]
     || !homeWorkLocations[directionAndUserId.userId].home
     || !homeWorkLocations[directionAndUserId.userId].work) {
-    callback("No work and/or home stations setup for user! Try commands /set_home and /set_work");
+    callback("No work and/or home stations setup for user! Try commands /sethome and /setwork");
   } else {
     if (directionAndUserId.direction == "work") {
       haeJunatReitille2(homeWorkLocations[directionAndUserId.userId].home, homeWorkLocations[directionAndUserId.userId].work, 10, false, (response) => {

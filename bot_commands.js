@@ -193,8 +193,8 @@ bot.command(['/t', '/trains', '/junat'], (ctx) => {
   }
 })
 
-bot.command(['/set_home', '/set_work'], (ctx) => {
-  debugLog("set_home / set_work command called");
+bot.command(['/sethome', '/setwork'], (ctx) => {
+  debugLog("sethome / setwork command called");
 
   const chatId = ctx.update.message.chat.id;
   const extras = { parse_mode: 'Markdown' };
@@ -202,7 +202,7 @@ bot.command(['/set_home', '/set_work'], (ctx) => {
   let text = ctx.update.message.text.split(' ');
   if (text.length == 2) {
     let homeWorkLocation = { userId: ctx.update.message.from.id };
-    if (text[0] == '/set_home') {
+    if (text[0] == '/sethome') {
       homeWorkLocation.home = text[1];
     } else {
       homeWorkLocation.work = text[1];
@@ -214,8 +214,8 @@ bot.command(['/set_home', '/set_work'], (ctx) => {
     })
   } else {
     let output = "You can set home and work location for quick route by: \r\n"
-      + "/set_home <station name>\r\n"
-      + "/set_work <station name>\r\n"
+      + "/sethome <station name>\r\n"
+      + "/setwork <station name>\r\n"
       + "You can try searching station by /station <city name>\r\n"
       + "Then you can use quick commands for trains on that route:\r\n"
       + "/ho /home returns next 10 trains from work to home.\r\n"
@@ -248,8 +248,8 @@ bot.command(['/home', '/ho', '/work', '/wo'], (ctx) => {
     })
   } else {
     let output = "You can set home and work location for quick route by: \r\n"
-      + "/set_home <station name>\r\n"
-      + "/set_work <station name>\r\n"
+      + "/sethome <station name>\r\n"
+      + "/setwork <station name>\r\n"
       + "You can try searching station by /station <city name>\r\n"
       + "Then you can use quick commands for trains on that route:\r\n"
       + "/ho /home returns next 10 trains from work to home.\r\n"
