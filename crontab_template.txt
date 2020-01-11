@@ -1,0 +1,53 @@
+# Edit this file to introduce tasks to be run by cron.
+# 
+# Each task to run has to be defined through a single line
+# indicating with different fields when the task will be run
+# and what command to run for the task
+# 
+# To define the time you can provide concrete values for
+# minute (m), hour (h), day of month (dom), month (mon),
+# and day of week (dow) or use '*' in these fields (for 'any').# 
+# Notice that tasks will be started based on the cron's system
+# daemon's notion of time and timezones.
+# 
+# Output of the crontab jobs (including errors) is sent through
+# email to the user the crontab file belongs to (unless redirected).
+# 
+# For example, you can run a backup of all your user accounts
+# at 5 a.m every week with:
+# 0 5 * * 1 tar -zcf /var/backups/home.tgz /home/
+# 
+# For more information see the manual pages of crontab(5) and cron(8)
+# 
+# m h  dom mon dow   command
+
+# weekdays morning
+00 7 * * 1 cd ~/git/telegrambot/ && node bot_cronjob.js -m -WshHFN
+00 7 * * 2 cd ~/git/telegrambot/ && node bot_cronjob.js -m -WshHFN
+00 7 * * 3 cd ~/git/telegrambot/ && node bot_cronjob.js -m -WshHFN
+00 7 * * 4 cd ~/git/telegrambot/ && node bot_cronjob.js -m -WshHFN
+00 7 * * 5 cd ~/git/telegrambot/ && node bot_cronjob.js -m -WshHFN
+
+# weekdays evening
+45 15 * * 1 cd ~/git/telegrambot/ && node bot_cronjob.js -e -WM
+45 15 * * 2 cd ~/git/telegrambot/ && node bot_cronjob.js -e -WM
+45 15 * * 3 cd ~/git/telegrambot/ && node bot_cronjob.js -e -WM
+45 15 * * 4 cd ~/git/telegrambot/ && node bot_cronjob.js -e -WM
+45 15 * * 5 cd ~/git/telegrambot/ && node bot_cronjob.js -e -f -WM
+
+# weekdays lunch menu
+00 9 * * 1 cd ~/git/telegrambot/ && node bot_cronjob.js --l_week
+00 9 * * 2 cd ~/git/telegrambot/ && node bot_cronjob.js --l_today
+00 9 * * 3 cd ~/git/telegrambot/ && node bot_cronjob.js --l_today
+00 9 * * 4 cd ~/git/telegrambot/ && node bot_cronjob.js --l_today
+00 9 * * 5 cd ~/git/telegrambot/ && node bot_cronjob.js --l_today
+
+# weekend
+00 9 * * 6 cd ~/git/telegrambot/ && node bot_cronjob.js -w -WshHFNM
+00 9 * * 0 cd ~/git/telegrambot/ && node bot_cronjob.js -w -WshHFNM
+
+# check if bot_commands.js is down and restart it if need to.
+00 12 * * 0 cd ~/git/telegrambot/ && ./check_bot_is_running.sh
+
+# on reboot start telegrambot
+@reboot cd ~/git/telegrambot/ && ./check_bot_is_running.sh
