@@ -43,8 +43,8 @@ isAllUpperCase = (word) => {
 tulostaJunienTiedot = (lahtevatJunat, haeCargoJunat, trainAmountMax) => {
   let trainAmount = 0;
   let output = "";
-  if (lahtevatJunat != undefined && lahtevatJunat.length > 0) {
-    if (lahtevatJunat.targetAsema2 != undefined) {
+  if (lahtevatJunat && lahtevatJunat.length > 0) {
+    if (lahtevatJunat.targetAsema2) {
       output += "* to " + lahtevatJunat.targetAsema2.nimi + "*";
     }
     output += "\r\n\r\n";
@@ -53,35 +53,16 @@ tulostaJunienTiedot = (lahtevatJunat, haeCargoJunat, trainAmountMax) => {
 
       if (!haeCargoJunat && lahtevatJunat[i].kategoria == "Cargo") { continue; }
       if (haeCargoJunat && lahtevatJunat[i].kategoria != "Cargo") { continue; }
-      if (lahtevatJunat[i].targetLahtoAika != undefined) {
-        output += " (" + lahtevatJunat[i].targetLahtoAika.getDate() + "." + (lahtevatJunat[i].targetLahtoAika.getMonth() + 1) + ".) ";
+      if (lahtevatJunat[i].targetLahtoAika) {
+        output += ('0' + lahtevatJunat[i].targetLahtoAika.getHours()).substr(-2) + ":";
+        output += ('0' + lahtevatJunat[i].targetLahtoAika.getMinutes()).substr(-2);
 
-        if (lahtevatJunat[i].targetLahtoAika.getHours() < 10) {
-          output += "0";
-        }
-        output += lahtevatJunat[i].targetLahtoAika.getHours() + ":";
-
-        if (lahtevatJunat[i].targetLahtoAika.getMinutes() < 10) {
-          output += "0";
-        }
-        output += lahtevatJunat[i].targetLahtoAika.getMinutes();
-
-        if (lahtevatJunat[i].targetEro > 0) { // targetEro != undefined
+        if (lahtevatJunat[i].targetEro > 0) {
           output += "->*";
-          if (lahtevatJunat[i].targetLiveArvio.getHours() < 10) {
-            output += "0";
-          }
-          output += lahtevatJunat[i].targetLiveArvio.getHours() + ":";
-
-          if (lahtevatJunat[i].targetLiveArvio.getMinutes() < 10) {
-            output += "0";
-          }
-          output += lahtevatJunat[i].targetLiveArvio.getMinutes();
-
-          output += "(+" + lahtevatJunat[i].targetEro + "min)*" + e_warning;
+          output += ('0' + lahtevatJunat[i].targetLiveArvio.getHours()).substr(-2) + ":";
+          output += ('0' + lahtevatJunat[i].targetLiveArvio.getMinutes()).substr(-2) + "*";
         }
       }
-      //  output += " " + lahtevatJunat[i].targetLiveArvio.getHours() + ":" + lahtevatJunat[i].targetLiveArvio.getMinutes();
 
       output += " ";
 
@@ -94,24 +75,19 @@ tulostaJunienTiedot = (lahtevatJunat, haeCargoJunat, trainAmountMax) => {
         output += e_train + lahtevatJunat[i].tyyppi;
       }
       output += " ";
-      if (lahtevatJunat[i].targetraide != undefined) {
+      if (lahtevatJunat[i].targetraide) {
         output += "Track " + lahtevatJunat[i].targetraide + " : ";
       }
-      output += lahtevatJunat[i].lahtopaikka.nimi + "-" + lahtevatJunat[i].maaranpaa.nimi;
-      if (lahtevatJunat[i].target2LahtoAika != undefined) {
-        output += " [";
-        if (lahtevatJunat[i].target2LahtoAika.getHours() < 10) {
-          output += "0";
-        }
-        output += lahtevatJunat[i].target2LahtoAika.getHours() + ":";
 
-        if (lahtevatJunat[i].target2LahtoAika.getMinutes() < 10) {
-          output += "0";
-        }
-        output += lahtevatJunat[i].target2LahtoAika.getMinutes();
-        output += "]";
-      } else {
-        //console.log("lahtevatJunat.target2LahtoAika is undefined");
+      output += lahtevatJunat[i].lahtopaikka.nimi + "-" + lahtevatJunat[i].maaranpaa.nimi;
+
+      if (lahtevatJunat[i].target2LahtoAika) {
+        output += ('0' + lahtevatJunat[i].target2LahtoAika.getHours()).substr(-2) + ":";
+        output += ('0' + lahtevatJunat[i].target2LahtoAika.getMinutes()).substr(-2);
+      }
+
+      if (lahtevatJunat[i].targetTimeTaken) {
+        output += " (" + helper.msToHumanReadable(lahtevatJunat[i].targetTimeTaken, true) + ")";
       }
 
       if (lahtevatJunat[i].cancelled == true) {
@@ -151,7 +127,7 @@ haeAsemat = (callback) => {
       const responsedata = JSON.parse(buffer.toString());
 
       for (i = 0; i < responsedata.length; i++) {
-        asema = new Object();
+        asema = new Object(); // TODO: convert to use class
         asema.nimi = responsedata[i].stationName.toLowerCase();
         if (asema.nimi.endsWith(" asema")) {
           asema.nimi = asema.nimi.slice(0, asema.nimi.length - 6);
@@ -228,9 +204,9 @@ parseJunat = (responsedata, lahto, maaranpaa) => {
     "version": 229165807229,
     "timetableType": "REGULAR",
     "timetableAcceptanceDate": "2017-05-26T15:37:01.000Z",
-    "timeTableRows":
+    "timeTableRows": [ {}, {}, ...]
     */
-    juna = new Object();
+    juna = new Object(); // TODO: convert to use class
     juna.tyyppi = responsedata[i].trainType;
     juna.kategoria = responsedata[i].trainCategory;
     juna.ajossa = responsedata[i].runningCurrently;
@@ -254,7 +230,7 @@ parseJunat = (responsedata, lahto, maaranpaa) => {
           juna.targetEro = juna.aikataulu[j].differenceInMinutes;
           juna.targetraide = juna.aikataulu[j].commercialTrack;
         }
-        if (maaranpaa != undefined && pysakki.nimi == maaranpaa.nimi) {
+        if (maaranpaa != undefined && j != 0 && pysakki.nimi == maaranpaa.nimi) {
           juna.target2LahtoAika = new Date(juna.aikataulu[j].scheduledTime);
           juna.target2Arvio = new Date(juna.aikataulu[j].actualTime);
           juna.target2LiveArvio = new Date(juna.aikataulu[j].liveEstimateTime);
@@ -272,6 +248,10 @@ parseJunat = (responsedata, lahto, maaranpaa) => {
         juna.lahtopaikka.arviolahtoaika = new Date(juna.aikataulu[0].liveEstimateTime);
       }
       juna.lahtopaikka.lahtoaikaero = juna.aikataulu[0].differenceInMinutes;
+
+      if (juna.targetLahtoAika && juna.target2LahtoAika) {
+        juna.targetTimeTaken = juna.target2LahtoAika.getTime() - juna.targetLahtoAika.getTime();
+      }
 
       juna.maaranpaa = new Object();
       juna.maaranpaa.nimi = haePaikkaKokonimi(juna.aikataulu[juna.aikataulu.length - 1].stationShortCode);

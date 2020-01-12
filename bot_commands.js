@@ -17,6 +17,7 @@ const settings = require('./settings.json');
 const Telegraf = require('telegraf');
 let cmdargs = require('commander');
 
+const helper = require('./data_parsers/helper.js');
 const train_parser = require('./data_parsers/vr-trains.js');
 const weather_parser = require('./data_parsers/weather.js');
 const news_parser = require('./data_parsers/news3.js');
@@ -63,32 +64,6 @@ const e_train2 = '\u{1F682}';
 
 const extras_ = { parse_mode: 'Html' };
 
-
-// milliseconds to more human readable format
-msToHumanReadable = (ms) => {
-  days = Math.floor(ms / (24 * 60 * 60 * 1000));
-  daysms = ms % (24 * 60 * 60 * 1000);
-  hours = Math.floor((daysms) / (60 * 60 * 1000));
-  hoursms = ms % (60 * 60 * 1000);
-  minutes = Math.floor((hoursms) / (60 * 1000));
-  minutesms = ms % (60 * 1000);
-  seconds = Math.floor((minutesms) / (1000));
-  output = "";
-  if (days > 0) {
-    output += days + " days ";
-  }
-  if (hours > 0) {
-    output += hours + " hours ";
-  }
-  if (minutes > 0) {
-    output += minutes + " minutes ";
-  }
-  if (seconds > 0) {
-    output += seconds + " seconds";
-  }
-  return output;
-}
-
 lastDay = (y, m) => {
   return new Date(y, m + 1, 0).getDate();
 }
@@ -131,7 +106,7 @@ bot.command(['/uptime', '/up'], (ctx) => {
     + " " + startTime.getDate()
     + "." + (startTime.getMonth() + 1)
     + "." + startTime.getFullYear() + "\r\n";
-  output += "Uptime is " + msToHumanReadable(uptime);
+  output += "Uptime is " + helper.msToHumanReadable(uptime);
   ctx.reply(output);
 });
 

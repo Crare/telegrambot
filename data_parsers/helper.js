@@ -60,6 +60,47 @@ exports.renameFile = (path, new_file_name) => {
   });
 }
 
+// milliseconds to more human readable format
+exports.msToHumanReadable = (ms, useShorthand = false) => {
+  days = Math.floor(ms / (24 * 60 * 60 * 1000));
+  daysms = ms % (24 * 60 * 60 * 1000);
+  hours = Math.floor((daysms) / (60 * 60 * 1000));
+  hoursms = ms % (60 * 60 * 1000);
+  minutes = Math.floor((hoursms) / (60 * 1000));
+  minutesms = ms % (60 * 1000);
+  seconds = Math.floor((minutesms) / (1000));
+  output = "";
+  if (days > 0) {
+    if (useShorthand) {
+      output += days + "d ";
+    } else {
+      output += days + " days ";
+    }
+  }
+  if (hours > 0) {
+    if (useShorthand) {
+      output += hours + "h ";
+    } else {
+      output += hours + " hours ";
+    }
+  }
+  if (minutes > 0) {
+    if (useShorthand) {
+      output += minutes + "min ";
+    } else {
+      output += minutes + " minutes ";
+    }
+  }
+  if (seconds > 0) {
+    if (useShorthand) {
+      output += seconds + "s";
+    } else {
+      output += seconds + " seconds";
+    }
+  }
+  return output;
+}
+
 /*
 'r' - Open file for reading. An exception occurs if the file does not exist.
 
