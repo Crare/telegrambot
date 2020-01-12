@@ -31,11 +31,16 @@ exports.loadJson = (path, callback) => {
   });
 }
 
-exports.writeToJson = (path, data) => {
-  fs.writeFile(path, JSON.stringify(data), 'utf8', (err) => {
+exports.writeToJson = (path, jsonData) => {
+  fs.writeFile(path, JSON.stringify(jsonData), 'utf8', (err) => {
     if (err) throw err;
     console.log('The file "' + path + '" has been saved!');
   });
+}
+
+exports.writeToJsonAsync = (path, jsonData) => {
+  fs.writeFileSync(path, JSON.stringify(jsonData), 'utf8');
+  console.log('The file "' + path + '" has been saved!');
 }
 
 // append to end of file

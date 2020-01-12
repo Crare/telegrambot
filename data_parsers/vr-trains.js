@@ -21,7 +21,7 @@ let homeWorkLocations = {};
 loadHomeWorkLocations = () => {
   helper.loadJson('./data/workHomeStations.json', (data) => {
     homeWorkLocations = data;
-    console.log("loaded homeWorkLocations: ", homeWorkLocations);
+    //console.log("loaded homeWorkLocations: ", homeWorkLocations);
   })
 }
 loadHomeWorkLocations();
@@ -70,16 +70,16 @@ tulostaJunienTiedot = (lahtevatJunat, haeCargoJunat, trainAmountMax) => {
         output += e_no_entry;
       }
       if (lahtevatJunat[i].linja) {
-        output += e_train2 + lahtevatJunat[i].linja;
+        output += e_train2 + " " + lahtevatJunat[i].linja;
       } else {
-        output += e_train + lahtevatJunat[i].tyyppi;
+        output += e_train + " " + lahtevatJunat[i].tyyppi;
       }
       output += " ";
       if (lahtevatJunat[i].targetraide) {
         output += "Track " + lahtevatJunat[i].targetraide + " : ";
       }
 
-      output += lahtevatJunat[i].lahtopaikka.nimi + "-" + lahtevatJunat[i].maaranpaa.nimi;
+      output += lahtevatJunat[i].lahtopaikka.nimi + "-" + lahtevatJunat[i].maaranpaa.nimi + " ";
 
       if (lahtevatJunat[i].target2LahtoAika) {
         output += ('0' + lahtevatJunat[i].target2LahtoAika.getHours()).substr(-2) + ":";
@@ -87,7 +87,7 @@ tulostaJunienTiedot = (lahtevatJunat, haeCargoJunat, trainAmountMax) => {
       }
 
       if (lahtevatJunat[i].targetTimeTaken) {
-        output += " (" + helper.msToHumanReadable(lahtevatJunat[i].targetTimeTaken, true) + ")";
+        output += " (" + helper.msToHumanReadable(lahtevatJunat[i].targetTimeTaken, true).trim() + ")";
       }
 
       if (lahtevatJunat[i].cancelled == true) {
@@ -129,6 +129,7 @@ haeAsemat = (callback) => {
       for (i = 0; i < responsedata.length; i++) {
         asema = new Object(); // TODO: convert to use class
         asema.nimi = responsedata[i].stationName.toLowerCase();
+        /**/
         if (asema.nimi.endsWith(" asema")) {
           asema.nimi = asema.nimi.slice(0, asema.nimi.length - 6);
         } else if (asema.nimi.endsWith("_(finljandski)")) {
@@ -136,6 +137,7 @@ haeAsemat = (callback) => {
         } else if (asema.nimi.endsWith("_(leningradski)")) {
           asema.nimi = asema.nimi.slice(0, asema.nimi.length - 15);
         }
+        /**/
         asema.nimi = capitalize(asema.nimi);
         asema.lyhenne = responsedata[i].stationShortCode;
         asema.tyyppi = responsedata[i].type;
@@ -146,51 +148,53 @@ haeAsemat = (callback) => {
         asema.lon = responsedata[i].longitude;
         asemat.push(asema);
       }
-      console.log("Juna-asemia löytyi yhteensä " + asemat.length + " kappaletta.");
-      // console.log(asemat);
+      console.log("Found  " + asemat.length + " train-stations.");
       callback(asemat);
     });
   });
 }
+
 haeAsemat((_asemat) => {
   asemat = _asemat;
 });
 
 haePaikkaKokonimi = (lyhenne) => {
-  for (x = 0; x < asemat.length; x++) {
-    if (asemat[x].lyhenne == lyhenne) {
-      return asemat[x].nimi.charAt(0).toUpperCase() + asemat[x].nimi.slice(1); //capitalize
-      break;
-    }
-  }
-  return "";
+  const asema = searchStationByShorthandCode(lyhenne)
+  return capitalize(asema.nimi);
 }
 
-haeAsemanLyhenne = (aseman_nimi) => {
-  for (i = 0; i < asemat.length; i++) {
-    if (asemat[i].nimi == aseman_nimi) {
-      //console.log("lyhenne löytyi: " + asemat[i].lyhenne);
-      return asemat[i].lyhenne;
+searchStationByName = (name) => {
+  for (let i = 0; i < asemat.length; i++) {
+    if (asemat[i].nimi.toLowerCase() == name.toLowerCase()) {
+      return asemat[i];
+    } else if (asemat[i].nimi.toLowerCase() == (name + " asema").toLowerCase()) {
+      return asemat[i];
     }
   }
-  //console.log("juna-asemaa ei löytynyt");
   return null;
 }
 
-haeAsemanKokonimi = (aseman_lyhenne) => {
-  for (i = 0; i < asemat.length; i++) {
-    if (asemat[i].lyhenne == aseman_lyhenne) {
-      //console.log("kokonimi löytyi: " + asemat[i].nimi);
-      return asemat[i].nimi;
+searchStationByShorthandCode = (shortcode) => {
+  for (let i = 0; i < asemat.length; i++) {
+    if (asemat[i].lyhenne.toLowerCase() == shortcode.toLowerCase()) {
+      return asemat[i];
     }
   }
-  //console.log("juna-asemalle ei löytynyt nimeä");
   return null;
+}
+
+searchStationByNameOrShorthandCode = (nameOrShortcode) => {
+  let station = searchStationByName(nameOrShortcode);
+  if (station) {
+    return station;
+  } else {
+    return searchStationByShorthandCode(nameOrShortcode);
+  }
 }
 
 parseJunat = (responsedata, lahto, maaranpaa) => {
   let junat = [];
-  for (i = 0; i < responsedata.length; i++) {
+  for (let i = 0; i < responsedata.length; i++) {
     /*
     "trainNumber": 9839,
     "departureDate": "2017-07-08",
@@ -206,7 +210,7 @@ parseJunat = (responsedata, lahto, maaranpaa) => {
     "timetableAcceptanceDate": "2017-05-26T15:37:01.000Z",
     "timeTableRows": [ {}, {}, ...]
     */
-    juna = new Object(); // TODO: convert to use class
+    let juna = new Object(); // TODO: convert to use class
     juna.tyyppi = responsedata[i].trainType;
     juna.kategoria = responsedata[i].trainCategory;
     juna.ajossa = responsedata[i].runningCurrently;
@@ -217,20 +221,22 @@ parseJunat = (responsedata, lahto, maaranpaa) => {
     juna.aikataulutyyppi = responsedata[i].timetableType;
     juna.aikataulu = responsedata[i].timeTableRows;
     juna.pysakit = [];
-    if (juna.aikataulu != undefined) {
+    if (juna.aikataulu) {
       for (j = 0; j < juna.aikataulu.length; j++) {
-        pysakki = new Object();
-        pysakki.nimi = haePaikkaKokonimi(juna.aikataulu[j].stationShortCode);
+        let pysakki = new Object();
+        let asema = searchStationByNameOrShorthandCode(juna.aikataulu[j].stationShortCode);
+        pysakki.nimi = capitalize(asema.nimi);
+        pysakki.lyhenne = asema.lyhenne;
         pysakki.lahtoaika = juna.aikataulu[j].scheduledTime;
         juna.pysakit.push(pysakki);
-        if (pysakki.nimi == lahto.nimi) {
+        if (pysakki.lyhenne == lahto.lyhenne) {
           juna.targetLahtoAika = new Date(juna.aikataulu[j].scheduledTime);
           juna.targetArvio = new Date(juna.aikataulu[j].actualTime);
           juna.targetLiveArvio = new Date(juna.aikataulu[j].liveEstimateTime);
           juna.targetEro = juna.aikataulu[j].differenceInMinutes;
           juna.targetraide = juna.aikataulu[j].commercialTrack;
         }
-        if (maaranpaa != undefined && j != 0 && pysakki.nimi == maaranpaa.nimi) {
+        if (maaranpaa && pysakki.lyhenne == maaranpaa.lyhenne) {
           juna.target2LahtoAika = new Date(juna.aikataulu[j].scheduledTime);
           juna.target2Arvio = new Date(juna.aikataulu[j].actualTime);
           juna.target2LiveArvio = new Date(juna.aikataulu[j].liveEstimateTime);
@@ -249,10 +255,6 @@ parseJunat = (responsedata, lahto, maaranpaa) => {
       }
       juna.lahtopaikka.lahtoaikaero = juna.aikataulu[0].differenceInMinutes;
 
-      if (juna.targetLahtoAika && juna.target2LahtoAika) {
-        juna.targetTimeTaken = juna.target2LahtoAika.getTime() - juna.targetLahtoAika.getTime();
-      }
-
       juna.maaranpaa = new Object();
       juna.maaranpaa.nimi = haePaikkaKokonimi(juna.aikataulu[juna.aikataulu.length - 1].stationShortCode);
       juna.maaranpaa.lahtoaika = new Date(juna.aikataulu[juna.aikataulu.length - 1].scheduledTime);
@@ -262,10 +264,15 @@ parseJunat = (responsedata, lahto, maaranpaa) => {
         juna.maaranpaa.arviolahtoaika = new Date(juna.aikataulu[juna.aikataulu.length - 1].liveEstimateTime);
       }
       juna.maaranpaa.lahtoaikaero = juna.aikataulu[juna.aikataulu.length - 1].differenceInMinutes;
+
+      if (juna.lahtopaikka && juna.maaranpaa) {
+        juna.targetTimeTaken = juna.maaranpaa.lahtoaika.getTime() - juna.lahtopaikka.lahtoaika.getTime();
+      }
     }
     junat.push(juna);
-
   }
+
+  //helper.writeToJsonAsync("junat.json", junat);
 
   // sort by departing time.
   junat.sort(function (a, b) {
@@ -276,21 +283,8 @@ parseJunat = (responsedata, lahto, maaranpaa) => {
 }
 
 luoAsema = (paikka) => {
-  asema = new Object();
-  if (isAllUpperCase(paikka)) {
-    asema.lyhenne = paikka;
-  } else {
-    asema.nimi = paikka;
-  }
-  if (asema.nimi == undefined) {
-    asema.nimi = haeAsemanKokonimi(asema.lyhenne);
-    //console.log(asema.nimi);
-  }
-  if (asema.nimi != null) {
-    asema.nimi = asema.nimi.toLowerCase();
-    asema.nimi = capitalize(asema.nimi);
-    asema.lyhenne = haeAsemanLyhenne(asema.nimi);
-  }
+  let asema = searchStationByNameOrShorthandCode(paikka);
+  asema.nimi = capitalize(asema.nimi);
   return asema;
 }
 
@@ -362,57 +356,51 @@ exports.haeJunatReitille = (start, end, trainAmount, haeCargoJunat, callBack) =>
 }
 
 haeJunatReitille2 = (start, end, trainAmount, haeCargoJunat, callBack) => {
-  haeAsemat(function callb(response_asemat) {
-    asemat = response_asemat;
-    const lahto = luoAsema(start);
-    const maaranpaa = luoAsema(end);
+  const lahto = luoAsema(start);
+  const maaranpaa = luoAsema(end);
 
-    if (lahto != null && maaranpaa != null) {
-      https.get(encodeURI("https://rata.digitraffic.fi/api/v1/schedules?departure_station=" + lahto.lyhenne + "&arrival_station=" + maaranpaa.lyhenne + "&limit=10"), (response) => {
-        let data = [];
-        response.on('data', function (chunk) {
-          data.push(chunk);
-        }).on('end', function () {
-          let buffer = Buffer.concat(data);
-          console.log(typeof buffer);
-          if (typeof buffer == "object") {
-            const responsedata = JSON.parse(buffer.toString('utf-8'));
-            // console.log(responsedata);
-            junat = parseJunat(responsedata, lahto, maaranpaa);
-            if (junat != undefined) {
-              junat.targetAsema = lahto;
-              junat.targetAsema2 = maaranpaa;
-              output = tulostaJunienTiedot(junat, haeCargoJunat, trainAmount);
-              //console.log(output);
-              callBack(output);
-            } else {
-              let output = "Couldn't find traindata for ";
-              if (lahto.nimi) { output += lahto.nimi; }
-              else { output += lahto.lyhenne; }
-              output += " to ";
-              if (maaranpaa.nimi) { output += maaranpaa.nimi; }
-              else { output += maaranpaa.lyhenne; }
-              callBack(output);
-            }
+  if (lahto != null && maaranpaa != null) {
+    https.get(encodeURI("https://rata.digitraffic.fi/api/v1/schedules?departure_station=" + lahto.lyhenne + "&arrival_station=" + maaranpaa.lyhenne + "&limit=10"), (response) => {
+      let data = [];
+      response.on('data', function (chunk) {
+        data.push(chunk);
+      }).on('end', function () {
+        let buffer = Buffer.concat(data);
+        if (typeof buffer == "object") {
+          const responsedata = JSON.parse(buffer.toString('utf-8'));
+          junat = parseJunat(responsedata, lahto, maaranpaa);
+          if (junat != undefined) {
+            junat.targetAsema = lahto;
+            junat.targetAsema2 = maaranpaa;
+            output = tulostaJunienTiedot(junat, haeCargoJunat, trainAmount);
+            callBack(output);
           } else {
-            callBack("Error happened while getting traindata, try again.");
+            let output = "Couldn't find traindata for ";
+            if (lahto.nimi) { output += lahto.nimi; }
+            else { output += lahto.lyhenne; }
+            output += " to ";
+            if (maaranpaa.nimi) { output += maaranpaa.nimi; }
+            else { output += maaranpaa.lyhenne; }
+            callBack(output);
           }
-        });
-
-      }).on('error', (e) => {
-        console.log("error");
-        console.error(e);
+        } else {
+          callBack("Error happened while getting traindata, try again.");
+        }
       });
-    } else {
-      let output = "Couldn't find traindata for ";
-      if (lahto.nimi) { output += lahto.nimi; }
-      else { output += lahto.lyhenne; }
-      output += " to ";
-      if (maaranpaa.nimi) { output += maaranpaa.nimi; }
-      else { output += maaranpaa.lyhenne; }
-      callBack(output);
-    }
-  });
+
+    }).on('error', (e) => {
+      console.log("error");
+      console.error(e);
+    });
+  } else {
+    let output = "Couldn't find traindata for ";
+    if (lahto.nimi) { output += lahto.nimi; }
+    else { output += lahto.lyhenne; }
+    output += " to ";
+    if (maaranpaa.nimi) { output += maaranpaa.nimi; }
+    else { output += maaranpaa.lyhenne; }
+    callBack(output);
+  }
 }
 
 
