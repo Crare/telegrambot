@@ -1,5 +1,6 @@
 // vr-trains.js made by Juho.
 //documentation for train API: https://rata.digitraffic.fi/api/v1/doc/index.html
+// Liikennetietojen lähde Traffic Management Finland / digitraffic.fi, lisenssi CC 4.0 BY
 // TODO: rename these functions in english and cleanup.
 
 const https = require('https');
@@ -40,6 +41,10 @@ isAllUpperCase = (word) => {
   return true;
 }
 
+function withLeadingZero(n) {
+  return (n < 10 ? '0' : '') + n;
+}
+
 tulostaJunienTiedot = (lahtevatJunat, haeCargoJunat, trainAmountMax) => {
   let trainAmount = 0;
   let output = "";
@@ -54,13 +59,13 @@ tulostaJunienTiedot = (lahtevatJunat, haeCargoJunat, trainAmountMax) => {
       if (!haeCargoJunat && lahtevatJunat[i].kategoria == "Cargo") { continue; }
       if (haeCargoJunat && lahtevatJunat[i].kategoria != "Cargo") { continue; }
       if (lahtevatJunat[i].targetLahtoAika) {
-        output += ('0' + lahtevatJunat[i].targetLahtoAika.getHours()).substr(-2) + ":";
-        output += ('0' + lahtevatJunat[i].targetLahtoAika.getMinutes()).substr(-2);
+        output += withLeadingZero(lahtevatJunat[i].targetLahtoAika.getHours()) + ":";
+        output += withLeadingZero(lahtevatJunat[i].targetLahtoAika.getMinutes());
 
         if (lahtevatJunat[i].targetEro > 0) {
           output += "->*";
-          output += ('0' + lahtevatJunat[i].targetLiveArvio.getHours()).substr(-2) + ":";
-          output += ('0' + lahtevatJunat[i].targetLiveArvio.getMinutes()).substr(-2) + "*";
+          output += withLeadingZero(lahtevatJunat[i].targetLiveArvio.getHours()) + ":";
+          output += withLeadingZero(lahtevatJunat[i].targetLiveArvio.getMinutes()) + "*";
         }
       }
 
@@ -82,8 +87,8 @@ tulostaJunienTiedot = (lahtevatJunat, haeCargoJunat, trainAmountMax) => {
       output += lahtevatJunat[i].lahtopaikka.nimi + "-" + lahtevatJunat[i].maaranpaa.nimi + " ";
 
       if (lahtevatJunat[i].target2LahtoAika) {
-        output += ('0' + lahtevatJunat[i].target2LahtoAika.getHours()).substr(-2) + ":";
-        output += ('0' + lahtevatJunat[i].target2LahtoAika.getMinutes()).substr(-2);
+        output += withLeadingZero(lahtevatJunat[i].target2LahtoAika.getHours()) + ":";
+        output += withLeadingZero(lahtevatJunat[i].target2LahtoAika.getMinutes());
       }
 
       if (lahtevatJunat[i].targetTimeTaken) {
@@ -228,6 +233,7 @@ parseJunat = (responsedata, lahto, maaranpaa) => {
         pysakki.nimi = capitalize(asema.nimi);
         pysakki.lyhenne = asema.lyhenne;
         pysakki.lahtoaika = juna.aikataulu[j].scheduledTime;
+        pysakki.type = juna.aikataulu[j].type;
         juna.pysakit.push(pysakki);
         if (pysakki.lyhenne == lahto.lyhenne) {
           juna.targetLahtoAika = new Date(juna.aikataulu[j].scheduledTime);
@@ -264,10 +270,10 @@ parseJunat = (responsedata, lahto, maaranpaa) => {
         juna.maaranpaa.arviolahtoaika = new Date(juna.aikataulu[juna.aikataulu.length - 1].liveEstimateTime);
       }
       juna.maaranpaa.lahtoaikaero = juna.aikataulu[juna.aikataulu.length - 1].differenceInMinutes;
+    }
 
-      if (juna.lahtopaikka && juna.maaranpaa) {
-        juna.targetTimeTaken = juna.maaranpaa.lahtoaika.getTime() - juna.lahtopaikka.lahtoaika.getTime();
-      }
+    if (juna.targetLahtoAika && juna.target2LahtoAika) {
+      juna.targetTimeTaken = juna.targetLahtoAika.getTime() - juna.target2LahtoAika.getTime();
     }
     junat.push(juna);
   }
@@ -275,7 +281,7 @@ parseJunat = (responsedata, lahto, maaranpaa) => {
   //helper.writeToJsonAsync("junat.json", junat);
 
   // sort by departing time.
-  junat.sort(function (a, b) {
+  junat.sort((a, b) => {
     return a.targetLahtoAika.getTime() - b.targetLahtoAika.getTime();
   });
 
@@ -291,9 +297,7 @@ luoAsema = (paikka) => {
 exports.haeAsemanTiedot = (asema, callBack) => {
   asema = luoAsema(asema);
   let output = e_station + " Station: " + asema.nimi;
-  if (asema.maakoodi) {
-    output += ", " + asema.maakoodi;
-  }
+  if (asema.maakoodi) { output += ", " + asema.maakoodi; }
   if (asema.lyhenne) {
     let link = "https://www.vr.fi/cs/vr/fi/juku#station=" + asema.lyhenne;
     link = encodeURI(link);
@@ -302,7 +306,7 @@ exports.haeAsemanTiedot = (asema, callBack) => {
   if (asema.lat && asema.lon) {
     output += "latitude: " + asema.lat + ", longitude: " + asema.lon + "\r\n";
   }
-  if (asema.matkustajalinja != undefined) {
+  if (asema.matkustajalinja) {
     output += "PassengerTraffic: " + asema.matkustajalinja;
   }
   if (!asema.nimi || !asema.lyhenne) {
@@ -317,32 +321,33 @@ exports.haeAsemanTiedot = (asema, callBack) => {
 exports.haeAsemanJunat = (start, haeCargoJunat, trainAmount, callBack) => {
   const asema = luoAsema(start);
 
-  if (asema != null) {
-    https.get(encodeURI("https://rata.digitraffic.fi/api/v1/live-trains?station=" + asema.lyhenne + "&arrived_trains=0&arriving_trains=0&departed_trains=0&departing_trains=100&include_nonstopping=false"), (response) => {
+  if (asema) {
+    const apiUrl = "https://rata.digitraffic.fi/api/v1/live-trains?station=" + asema.lyhenne + "&arrived_trains=0&arriving_trains=0&departed_trains=0&departing_trains=100&include_nonstopping=false";
+    https.get(encodeURI(apiUrl), (response) => {
       let data = [];
-      response.on('data', function (chunk) {
-        data.push(chunk);
-      }).on('end', function () {
-        let buffer = Buffer.concat(data);
-        const responsedata = JSON.parse(buffer.toString('utf-8'));
+      response
+        .on('data', (chunk) => { data.push(chunk); })
+        .on('end', () => {
+          let buffer = Buffer.concat(data);
+          const responsedata = JSON.parse(buffer.toString('utf-8'));
 
-        let junat = undefined;
-        if (responsedata.code != "TRAIN_NOT_FOUND") {
-          junat = parseJunat(responsedata, asema, undefined);
-        }
+          let junat = undefined;
+          if (responsedata.code != "TRAIN_NOT_FOUND") {
+            junat = parseJunat(responsedata, asema, undefined);
+          }
 
-        if (junat != undefined) {
-          junat.targetAsema = asema;
-          output = tulostaJunienTiedot(junat, haeCargoJunat, trainAmount);
-          callBack(output);
-        } else {
-          let output = "Couldn't find traindata for ";
-          if (lahto.nimi) { output += lahto.nimi; }
-          else { output += lahto.lyhenne; }
-          callBack(output);
-        }
+          if (junat) {
+            junat.targetAsema = asema;
+            output = tulostaJunienTiedot(junat, haeCargoJunat, trainAmount);
+            callBack(output);
+          } else {
+            let output = "Couldn't find traindata for ";
+            if (lahto.nimi) { output += lahto.nimi; }
+            else { output += lahto.lyhenne; }
+            callBack(output);
+          }
 
-      });
+        });
 
     }).on('error', (e) => {
       console.error(e);
@@ -362,31 +367,31 @@ haeJunatReitille2 = (start, end, trainAmount, haeCargoJunat, callBack) => {
   if (lahto != null && maaranpaa != null) {
     https.get(encodeURI("https://rata.digitraffic.fi/api/v1/schedules?departure_station=" + lahto.lyhenne + "&arrival_station=" + maaranpaa.lyhenne + "&limit=10"), (response) => {
       let data = [];
-      response.on('data', function (chunk) {
-        data.push(chunk);
-      }).on('end', function () {
-        let buffer = Buffer.concat(data);
-        if (typeof buffer == "object") {
-          const responsedata = JSON.parse(buffer.toString('utf-8'));
-          junat = parseJunat(responsedata, lahto, maaranpaa);
-          if (junat != undefined) {
-            junat.targetAsema = lahto;
-            junat.targetAsema2 = maaranpaa;
-            output = tulostaJunienTiedot(junat, haeCargoJunat, trainAmount);
-            callBack(output);
+      response
+        .on('data', (chunk) => { data.push(chunk); })
+        .on('end', () => {
+          let buffer = Buffer.concat(data);
+          if (typeof buffer == "object") {
+            const responsedata = JSON.parse(buffer.toString('utf-8'));
+            junat = parseJunat(responsedata, lahto, maaranpaa);
+            if (junat) {
+              junat.targetAsema = lahto;
+              junat.targetAsema2 = maaranpaa;
+              output = tulostaJunienTiedot(junat, haeCargoJunat, trainAmount);
+              callBack(output);
+            } else {
+              let output = "Couldn't find traindata for ";
+              if (lahto.nimi) { output += lahto.nimi; }
+              else { output += lahto.lyhenne; }
+              output += " to ";
+              if (maaranpaa.nimi) { output += maaranpaa.nimi; }
+              else { output += maaranpaa.lyhenne; }
+              callBack(output);
+            }
           } else {
-            let output = "Couldn't find traindata for ";
-            if (lahto.nimi) { output += lahto.nimi; }
-            else { output += lahto.lyhenne; }
-            output += " to ";
-            if (maaranpaa.nimi) { output += maaranpaa.nimi; }
-            else { output += maaranpaa.lyhenne; }
-            callBack(output);
+            callBack("Error happened while getting traindata, try again.");
           }
-        } else {
-          callBack("Error happened while getting traindata, try again.");
-        }
-      });
+        });
 
     }).on('error', (e) => {
       console.log("error");
@@ -405,12 +410,10 @@ haeJunatReitille2 = (start, end, trainAmount, haeCargoJunat, callBack) => {
 
 
 exports.addHomeWorkLocation = (homeWorkLocation, callback) => {
-  if (!homeWorkLocation.userId) {
-    callback("userId not found");
-  } else {
-    if (!homeWorkLocations[homeWorkLocation.userId]) {
-      homeWorkLocations[homeWorkLocation.userId] = {};
-    }
+  if (!homeWorkLocation.userId) { callback("userId not found"); }
+  else {
+    if (!homeWorkLocations[homeWorkLocation.userId]) { homeWorkLocations[homeWorkLocation.userId] = {}; }
+
     if (homeWorkLocation.work) {
       homeWorkLocations[homeWorkLocation.userId].work = homeWorkLocation.work;
       helper.writeToJson('./data/workHomeStations.json', homeWorkLocations);
@@ -421,22 +424,19 @@ exports.addHomeWorkLocation = (homeWorkLocation, callback) => {
       helper.writeToJson('./data/workHomeStations.json', homeWorkLocations);
       callback("Set home location to " + homeWorkLocation.home);
 
-    } else {
-      callback("no work or home given!");
-    }
+    } else { callback("no work or home given!"); }
   }
 }
 
 exports.getTrainsHomeWorkLocation = (directionAndUserId, callback) => {
-  if (!directionAndUserId.direction) {
-    callback("direction not given!");
-  } else if (!directionAndUserId.userId) {
-    callback("userId not given!");
-  } else if (!homeWorkLocations[directionAndUserId.userId]
+  if (!directionAndUserId.direction) { callback("direction not given!"); }
+  else if (!directionAndUserId.userId) { callback("userId not given!"); }
+  else if (!homeWorkLocations[directionAndUserId.userId]
     || !homeWorkLocations[directionAndUserId.userId].home
     || !homeWorkLocations[directionAndUserId.userId].work) {
     callback("No work and/or home stations setup for user! Try commands /sethome and /setwork");
-  } else {
+  }
+  else {
     if (directionAndUserId.direction == "work") {
       haeJunatReitille2(homeWorkLocations[directionAndUserId.userId].home, homeWorkLocations[directionAndUserId.userId].work, 10, false, (response) => {
         callback(response);
