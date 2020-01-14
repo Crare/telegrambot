@@ -235,14 +235,14 @@ parseJunat = (responsedata, lahto, maaranpaa) => {
         pysakki.lahtoaika = juna.aikataulu[j].scheduledTime;
         pysakki.type = juna.aikataulu[j].type;
         juna.pysakit.push(pysakki);
-        if (pysakki.lyhenne == lahto.lyhenne) {
+        if (pysakki.lyhenne == lahto.lyhenne && pysakki.type == "DEPARTURE") {
           juna.targetLahtoAika = new Date(juna.aikataulu[j].scheduledTime);
           juna.targetArvio = new Date(juna.aikataulu[j].actualTime);
           juna.targetLiveArvio = new Date(juna.aikataulu[j].liveEstimateTime);
           juna.targetEro = juna.aikataulu[j].differenceInMinutes;
           juna.targetraide = juna.aikataulu[j].commercialTrack;
         }
-        if (maaranpaa && pysakki.lyhenne == maaranpaa.lyhenne) {
+        if (maaranpaa && pysakki.lyhenne == maaranpaa.lyhenne && pysakki.type == "ARRIVAL") {
           juna.target2LahtoAika = new Date(juna.aikataulu[j].scheduledTime);
           juna.target2Arvio = new Date(juna.aikataulu[j].actualTime);
           juna.target2LiveArvio = new Date(juna.aikataulu[j].liveEstimateTime);
